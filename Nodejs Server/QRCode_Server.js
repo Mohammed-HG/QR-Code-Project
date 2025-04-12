@@ -7,8 +7,9 @@ const multer = require('multer');
 const Tesseract = require('tesseract.js');
 const cors = require('cors')
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3200;
 
+app.use(cors());
 app.use(express.json());
 
 require('dotenv').config();
