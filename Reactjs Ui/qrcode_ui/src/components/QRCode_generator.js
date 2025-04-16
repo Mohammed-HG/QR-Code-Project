@@ -32,7 +32,7 @@ const QRCode_generator =  () => {
 
             try {
                 setIsLoading(true);
-                const response = await axios.post('http://localhost:3200/upload-image', formData, {
+                const response = await axios.post('http://localhost:3000/upload-image', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
                 setExtractedText(response.data.extractedText);
