@@ -5,34 +5,56 @@
 }
 
 .feature-section {
-  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh; /* تأكد أن القسم ياخذ كامل الشاشة */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 50px 20px;
+}
+
+.background-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.feature-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
+  max-width: 1000px;
+  width: 100%;
+  padding: 20px;
 }
 
 @media (min-width: 768px) {
-  .feature-section {
+  .feature-content {
     flex-direction: row;
     text-align: left;
+    justify-content: center;
+  }
+
+  .feature-image {
+    margin-right: 40px;
   }
 }
 
 .feature-image {
   width: 250px;
   height: 250px;
-  object-fit: contain;
-  margin-bottom: 20px;
-}
-
-@media (min-width: 768px) {
-  .feature-image {
-    margin-right: 40px;
-    margin-bottom: 0;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .feature-text h2 {
@@ -45,6 +67,7 @@
   color: #333;
 }
 
+
 .section-0 {
   background-color: #e1f340;
 }
@@ -54,10 +77,43 @@
 }
 
 .section-2 {
-  background-color: #f53e6c; 
-}
-
-.section-3 {
   background-color: #0be257; 
 }
 
+.section-3 {
+  background-color: #084cc9; 
+}
+
+.section-4 {
+  background-color: #851a1a;
+}
+
+.section-5 {
+  background-color: #45a049;
+}
+
+.cta-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #333333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.cta-button:hover {
+  background-color: #456ca0;
+}
+
+.floating-lottie {
+  position: fixed;
+  top: 10%;
+  right: 5%;
+  width: 200px;
+  height: 200px;
+  opacity: 0.2;
+  z-index: 0;
+  pointer-events: none;
+}
