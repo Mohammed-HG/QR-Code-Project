@@ -7,7 +7,7 @@
 .feature-section {
   position: relative;
   overflow: hidden;
-  min-height: 100vh; /* تأكد أن القسم ياخذ كامل الشاشة */
+  min-height: 125vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,7 +69,7 @@
 
 
 .section-0 {
-  background-color: #e1f340;
+  background-color: #ebde2a;
 }
 
 .section-1 {

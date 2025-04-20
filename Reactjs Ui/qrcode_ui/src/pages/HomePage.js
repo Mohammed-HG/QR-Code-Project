@@ -6,6 +6,7 @@ import Lottie from "lottie-react";
 import "../css style/HomePage.css";
 
 import QRCodeAnimation from "../animations/QRCode.json";
+import QRCodeAnimation1 from "../animations/QRCode1.json";
 import LinkQR from "../animations/Link-qr.json";
 import ImageQR from "../animations/Image-qr.json";
 import Customize from "../animations/Customize.json";
@@ -42,11 +43,11 @@ const features = [
   {
     title: "Try it now!",
     description: (
-      <Link to="/GRCode_Generator">
+      <Link to="/PrimaryPage">
         <button className="cta-button">Generate QR Code</button>
       </Link>
     ),
-    animation: null,
+    animation: QRCodeAnimation1,
   },
 ];
 
@@ -59,15 +60,15 @@ const HomePage = () => {
       if (content) {
         gsap.fromTo(
           content,
-          { opacity: 0, y: 200 },
+          { opacity: 0, y: 300 },
           {
             opacity: 1,
             y: 0,
-            duration: 1.5,
+            duration: 2,
             ease: "power3.out",
             scrollTrigger: {
               trigger: el,
-              start: "top 80%",
+              start: "top 5%",
               toggleActions: "play none none reverse",
             },
           }
