@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import QRCode_generator from './components/QRCode_generator';
+import PrimaryPage from './pages/PrimaryPage';
+import Link_GRCode from './components/Link_QRCode';
+import Image_QRCode from './components/Image_QRCode';
 import './App.css';
 
 function App() {
@@ -9,7 +11,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path='/GRCode_Generator' element={<QRCode_generator />} />
+        <Route path='/PrimaryPage' element={<PrimaryPage />} />
+        <Route path='/Link_GRCode' element={<Link_GRCode />} />
+        <Route path='/Image_QRCode' element={<Image_QRCode />} />
       </Routes>
     </Router>
   );
