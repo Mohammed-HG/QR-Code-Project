@@ -1,63 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import QRCode from 'qrcode';
+import QRCodeStyling from 'qr-code-styling';
 
-const Link_QRCode =  () => {
-    const [text, setText] = useState('');
-    const [qrCode, setQrCode] = useState('');
-    const [isLoading, setIsLoading] = useState('');
+const qrInstance = new QRCodeStyling({
+  width: 300,
+  height: 300,
+  type: 'canvas',
+  data: '',
+  image: '',
+  dotsOptions: {
+    color: '#000000',
+    type: 'rounded'
+  },
+  backgroundOptions: {
+    color: '#ffffff',
+  },
+  imageOptions: {
+    crossOrigin: "anonymous",
+    margin: 10,
+  },
+});
 
-    const generateQRFromText = async () => {
-        try {
-            setIsLoading(true);
-            const response = await axios.post('http://localhost:3200/generate-qr', { text });
-            setQrCode(response.data.qrCode);
-        } catch (error) {
-            alert('Failed to generate QR Code!');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+const Link_QRCode = () => {
+  const [text, setText] = useState('');
+  const [qrData, setQrData] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const qrRef = useRef(null);
 
+  const generateQRFromText = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post('http://localhost:3200/generate-qr', { text });
+      setQrData(text);
 
+      qrInstance.update({
+        data: text,
+      });
+    } catch (error) {
+      alert('Failed to generate QR Code!');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (qrData && qrRef.current) {
+      qrRef.current.innerHTML = ''; // عشان ما تتكرر
+      qrInstance.append(qrRef.current);
+    }
+  }, [qrData]);
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
       <h1>QR Code Generator</h1>
-      
-      {/* إدخال النص */}
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter text or URL"
-          style={{ padding: '10px', width: '100%' }}
-        />
-        <button 
-          onClick={generateQRFromText} 
-          disabled={!text || isLoading}
-          style={{ marginTop: '10px', padding: '10px 20px' }}
-        >
-          {isLoading ? 'Generating...' : 'Generate QR'}
-        </button>
-      </div>
 
+      <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Enter text or URL"
+        style={{ padding: '10px', width: '100%' }}
+      />
+      <button
+        onClick={generateQRFromText}
+        disabled={!text || isLoading}
+        style={{ marginTop: '10px', padding: '10px 20px' }}
+      >
+        {isLoading ? 'Generating...' : 'Generate QR'}
+      </button>
 
-
-      {/* عرض QR Code */}
-      {qrCode && (
+      {qrData && (
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
           <h3>Your QR Code:</h3>
-          <img src={qrCode} alt="QR Code" style={{ width: '200px', height: '200px' }} />
-          <div style={{ marginTop: '10px' }}>
-            <a 
-              href={qrCode} 
-              download="qrcode.png"
-              style={{ padding: '10px 20px', background: '#007bff', color: 'white', textDecoration: 'none' }}
+          <div ref={qrRef} />
+
+          {/* أدوات التصميم */}
+          <div style={{ marginTop: '20px' }}>
+            <label>لون النقاط:</label>
+            <input
+              type="color"
+              onChange={(e) => qrInstance.update({ dotsOptions: { color: e.target.value } })}
+            />
+
+            <label style={{ marginLeft: '10px' }}>شكل النقاط:</label>
+            <select
+              onChange={(e) => qrInstance.update({ dotsOptions: { type: e.target.value } })}
             >
-              Download QR
-            </a>
+              <option value="rounded">Rounded</option>
+              <option value="dots">Dots</option>
+              <option value="square">Square</option>
+            </select>
+
+            <div style={{ marginTop: '20px' }}>
+              <button
+                onClick={() => qrInstance.download({ name: 'qr-code', extension: 'png' })}
+                style={{ padding: '10px 20px', background: '#007bff', color: 'white' }}
+              >
+                Download QR
+              </button>
+            </div>
           </div>
         </div>
       )}
