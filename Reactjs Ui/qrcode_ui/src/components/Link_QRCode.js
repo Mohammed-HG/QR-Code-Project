@@ -30,7 +30,7 @@ const Link_QRCode = () => {
   const generateQRFromText = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.post('http://localhost:3200/generate-qr', { text });
+      const response = await axios.post('http://localhost:3200/qr/generate-qr', { text });
       setQrData(text);
 
       qrInstance.update({

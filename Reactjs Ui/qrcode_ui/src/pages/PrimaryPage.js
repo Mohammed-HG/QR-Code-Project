@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../css style/PrimaryPage.css";
+import "../styles/PrimaryPage.css";
 
 import LinkQR from "../components/Link_QRCode";
 import ImageQR from "../components/Image_QRCode";

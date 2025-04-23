@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link } from "react-router-dom";
 import Lottie from "lottie-react";
-import "../css style/HomePage.css";
+import "../styles/HomePage.css";
 
 import QRCodeAnimation from "../animations/QRCode.json";
 import QRCodeAnimation1 from "../animations/QRCode1.json";
