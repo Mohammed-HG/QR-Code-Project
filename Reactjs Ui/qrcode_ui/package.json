@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@react-spring/three": "^9.7.5",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -17,14 +19,17 @@
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
+    "react-bootstrap": "^2.10.9",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8",
+    "react-fontawesome": "^1.7.1",
     "react-icons": "^5.5.0",
     "react-intersection-observer": "^9.16.0",
     "react-qr-code": "^2.0.15",
     "react-router-dom": "^7.5.0",
     "react-scripts": "^5.0.1",
     "react-scroll-trigger": "^0.6.14",
+    "styled-components": "^6.1.17",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
