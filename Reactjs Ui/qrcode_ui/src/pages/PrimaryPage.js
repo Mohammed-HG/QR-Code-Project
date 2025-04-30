@@ -17,12 +17,36 @@ const qrInstance = new QRCodeStyling({
 
 const PrimaryPage = () => {
   const [activeService, setActiveService] = useState("link");
+  const [isLoading, setIsLoading] = useState(false);
+  const [text, setText] = useState('');
   const qrRef = useRef(null);
 
+  const handleChangeColor = (e) => {
+    qrInstance.update({ dotsOptions: { color: e.target.value } });
+  };
+
+  const handleChangeType = (e) => {
+    qrInstance.update({ dotsOptions: { type: e.target.value } });
+  };
+
+  const handleDownload = () => {
+    qrInstance.download({ name: "qr-code", extension: "png" });
+  };  
+
+  const handleGenerate = () => {
+    qrInstance.update({ data: {qrRef} });
+  };
+
+  const generateQRFromText = () => {
+    qrInstance.update({ data: text,})
+  };
+
+
+  
   const renderService = () => {
     switch (activeService) {
       case "linkQR":
-        return <LinkQR />;
+        return <LinkQR text={text} setText={setText}/>;
       case "imageQR":
         return <ImageQR />;
       default:
@@ -37,17 +61,7 @@ const PrimaryPage = () => {
     }
   }, []);
 
-  const handleChangeColor = (e) => {
-    qrInstance.update({ dotsOptions: { color: e.target.value } });
-  };
 
-  const handleChangeType = (e) => {
-    qrInstance.update({ dotsOptions: { type: e.target.value } });
-  };
-
-  const handleDownload = () => {
-    qrInstance.download({ name: "qr-code", extension: "png" });
-  };
 
   return (
     <>
@@ -55,6 +69,9 @@ const PrimaryPage = () => {
         activeService={activeService}
         setActiveService={setActiveService}
       />
+
+    <div className="card-1">
+
       <div className="flex-container">
         <div className="left-side">
           <div className="services-content">{renderService()}</div>
@@ -62,13 +79,22 @@ const PrimaryPage = () => {
 
         <div className="right-side">
           <div ref={qrRef} style={{ marginBottom: "20px" }} />
+
           <Customize
             onChangeColor={handleChangeColor}
             onChangeType={handleChangeType}
           />
-          <Buttons onDownload={handleDownload} />
+
+          <Buttons
+            onGenerate={generateQRFromText}
+            onDownload={handleDownload}
+            isLoading={isLoading}
+            disabled={!text}
+          />
+
         </div>
       </div>
+    </div>
     </>
   );
 };
