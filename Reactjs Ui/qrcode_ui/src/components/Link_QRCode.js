@@ -30,12 +30,9 @@ const Link_QRCode = () => {
   const generateQRFromText = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.post('http://localhost:3200/qr/generate-qr', { text });
+      await axios.post('http://localhost:3200/qr/generate-qr', { text });
       setQrData(text);
-
-      qrInstance.update({
-        data: text,
-      });
+      qrInstance.update({ data: text });
     } catch (error) {
       alert('Failed to generate QR Code!');
     } finally {
@@ -45,7 +42,7 @@ const Link_QRCode = () => {
 
   useEffect(() => {
     if (qrData && qrRef.current) {
-      qrRef.current.innerHTML = ''; // عشان ما تتكرر
+      qrRef.current.innerHTML = ''; // لمنع التكرار
       qrInstance.append(qrRef.current);
     }
   }, [qrData]);
@@ -74,32 +71,6 @@ const Link_QRCode = () => {
           <h3>Your QR Code:</h3>
           <div ref={qrRef} />
 
-          {/* أدوات التصميم */}
-          <div style={{ marginTop: '20px' }}>
-            <label>لون النقاط:</label>
-            <input
-              type="color"
-              onChange={(e) => qrInstance.update({ dotsOptions: { color: e.target.value } })}
-            />
-
-            <label style={{ marginLeft: '10px' }}>شكل النقاط:</label>
-            <select
-              onChange={(e) => qrInstance.update({ dotsOptions: { type: e.target.value } })}
-            >
-              <option value="rounded">Rounded</option>
-              <option value="dots">Dots</option>
-              <option value="square">Square</option>
-            </select>
-
-            <div style={{ marginTop: '20px' }}>
-              <button
-                onClick={() => qrInstance.download({ name: 'qr-code', extension: 'png' })}
-                style={{ padding: '10px 20px', background: '#007bff', color: 'white' }}
-              >
-                Download QR
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
