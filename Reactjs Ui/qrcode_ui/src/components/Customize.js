@@ -1,7 +1,7 @@
 import React from "react";
 
-const Customize = ({  onChangeColor, onChangeType  }) => {
-  if (!onChangeColor, onChangeType) return null;
+const Customize = ({ onChangeColor, onChangeType }) => {
+  if (!onChangeColor || !onChangeType) return null;
 
   return (
     <div style={{ marginTop: '20px' }}>

@@ -8,7 +8,7 @@ const Mini_NavBar = ({ activeService, setActiveService }) => {
   return (
     <Navbar bg="dark" variant="dark" expand={false}>
       <Container>
-          <Nav className="ms-auto flex-row">
+          <Nav className="flex-row">
           <button 
             className={`tab-btn ${activeService === "linkQR" ? "active" : ""}`} 
             onClick={() => setActiveService("linkQR")}
