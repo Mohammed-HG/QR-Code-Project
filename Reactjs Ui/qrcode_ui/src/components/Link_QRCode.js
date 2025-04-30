@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import QRCodeStyling from 'qr-code-styling';
+import Buttons from './Buttons';
 
 const qrInstance = new QRCodeStyling({
   width: 300,
@@ -21,8 +22,7 @@ const qrInstance = new QRCodeStyling({
   },
 });
 
-const Link_QRCode = () => {
-  const [text, setText] = useState('');
+const Link_QRCode = ({ text, setText }) => {
   const [qrData, setQrData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const qrRef = useRef(null);
@@ -58,13 +58,6 @@ const Link_QRCode = () => {
         placeholder="Enter text or URL"
         style={{ padding: '10px', width: '100%' }}
       />
-      <button
-        onClick={generateQRFromText}
-        disabled={!text || isLoading}
-        style={{ marginTop: '10px', padding: '10px 20px' }}
-      >
-        {isLoading ? 'Generating...' : 'Generate QR'}
-      </button>
 
       {qrData && (
         <div style={{ marginTop: '20px', textAlign: 'center' }}>
