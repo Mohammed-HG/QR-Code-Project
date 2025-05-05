@@ -4,53 +4,77 @@ import QRCodeStyling from "qr-code-styling";
 import "../styles/PrimaryPage.css";
 
 import LinkQR from "../components/Link_QRCode";
-import ImageQR from "../components/Image_QRCode";
+import TextQR from "../components/Text_QRCode";
+import WifiQR from "../components/Wi-Fi_QRCode";
 import Buttons from "../components/Buttons";
 import Customize from "../components/Customize";
-
-const qrInstance = new QRCodeStyling({
-  width: 300,
-  height: 300,
-  type: "canvas",
-  data: "https://example.com",
-});
 
 const PrimaryPage = () => {
   const [activeService, setActiveService] = useState("link");
   const [isLoading, setIsLoading] = useState(false);
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
+  const [dotColor, setDotColor] = useState("#000000");
+  const [dotShape, setDotShape] = useState("rounded");
+  const [bgColor, setBgColor] = useState("#ffffff");
+  const [qrSize, setQrSize] = useState(300);
   const qrRef = useRef(null);
 
-  const handleChangeColor = (e) => {
-    qrInstance.update({ dotsOptions: { color: e.target.value } });
+  const qrInstance = useRef(
+    new QRCodeStyling({
+      width: 300,
+      height: 300,
+      type: "canvas",
+      data: "https://example.com",
+    })
+  ).current;
+
+  const handleDotColor = (color) => {
+    setDotColor(color);
   };
 
-  const handleChangeType = (e) => {
-    qrInstance.update({ dotsOptions: { type: e.target.value } });
+  const handleDotShape = (shape) => {
+    setDotShape(shape);
+  };
+
+  const handleBgColor = (color) => {
+    setBgColor(color);
   };
 
   const handleDownload = () => {
     qrInstance.download({ name: "qr-code", extension: "png" });
-  };  
-
-  const handleGenerate = () => {
-    qrInstance.update({ data: {qrRef} });
   };
 
   const generateQRFromText = () => {
-    qrInstance.update({ data: text,})
+    qrInstance.update({ data: text });
   };
 
+  const handleSizeChange = (size) => {
+    setQrSize(size);
+    qrInstance.update({ width: size, height: size });
+  };
 
-  
+  const [ssid, setSsid] = useState("");
+  const [password, setPassword] = useState("");
+  const [encryption, setEncryption] = useState("WPA");
+
+
   const renderService = () => {
     switch (activeService) {
       case "linkQR":
-        return <LinkQR text={text} setText={setText}/>;
-      case "imageQR":
-        return <ImageQR />;
+        return <LinkQR text={text} setText={setText} />;
+      case "TextQR":
+        return <TextQR text={text} setText={setText} />;
+      case "WifiQR":
+        return <WifiQR    
+                  ssid={ssid}
+                  setSsid={setSsid}
+                  password={password}
+                  setPassword={setPassword}
+                  encryption={encryption}
+                  setEncryption={setEncryption}
+                />;
       default:
-        return <div>Choose Services !</div>;
+        return <LinkQR text={text} setText={setText} />;
     }
   };
 
@@ -61,7 +85,14 @@ const PrimaryPage = () => {
     }
   }, []);
 
-
+  useEffect(() => {
+    if (qrInstance) {
+      qrInstance.update({
+        dotsOptions: { color: dotColor, type: dotShape },
+        backgroundOptions: { color: bgColor },
+      });
+    }
+  }, [dotColor, dotShape, bgColor, text]);
 
   return (
     <>
@@ -69,33 +100,35 @@ const PrimaryPage = () => {
         activeService={activeService}
         setActiveService={setActiveService}
       />
+      <div className="card-1">
+        <div className="flex-container">
+          <div className="left-side">
+            <div className="services-content">{renderService()}</div>
+            
+            <Customize
+              onChangeDotColor={handleDotColor}
+              onChangeDotShape={handleDotShape}
+              onChangeBgColor={handleBgColor}
+              onChangeSize={handleSizeChange}
+            />
+          </div>
+          
+          <div className="right-side">
+            <br/>
+            <div ref={qrRef} style={{ marginBottom: "20px" }} />
 
-    <div className="card-1">
-
-      <div className="flex-container">
-        <div className="left-side">
-          <div className="services-content">{renderService()}</div>
-        </div>
-
-        <div className="right-side">
-          <div ref={qrRef} style={{ marginBottom: "20px" }} />
-
-          <Customize
-            onChangeColor={handleChangeColor}
-            onChangeType={handleChangeType}
-          />
-
-          <Buttons
-            onGenerate={generateQRFromText}
-            onDownload={handleDownload}
-            isLoading={isLoading}
-            disabled={!text}
-          />
-
+            <Buttons
+              onGenerate={generateQRFromText}
+              onDownload={handleDownload}
+              isLoading={isLoading}
+              disabled={!ssid || (!password && encryption !== "nopass")}
+              generateText="Generate QR Wi-Fi"
+            />
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
+
 export default PrimaryPage;

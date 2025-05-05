@@ -1,6 +1,6 @@
 import React from "react";
 
-const Buttons = ({ onDownload, onGenerate, isLoading, disabled }) => {
+const Buttons = ({ onDownload, onGenerate, isLoading, disabled, generateText = "Generate QR" }) => {
     return (
         <div>
           <button
@@ -8,7 +8,7 @@ const Buttons = ({ onDownload, onGenerate, isLoading, disabled }) => {
             disabled={disabled || isLoading}
             style={{ padding: '10px 20px', marginRight: '10px' }}
           >
-            {isLoading ? 'Generating...' : 'Generate QR'}
+            {isLoading ? 'Generating...' : generateText}
           </button>
     
           <button

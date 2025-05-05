@@ -1,43 +1,47 @@
 import React from "react";
+import '../styles/Customize.css'
 
-const Customize = ({ onChangeColor, onChangeType }) => {
-  if (!onChangeColor || !onChangeType) return null;
+const Customize = ({ onChangeDotColor, onChangeDotShape, onChangeBgColor, onChangeSize }) => {
+  if (!onChangeDotColor || !onChangeDotShape || !onChangeBgColor || !onChangeSize) return null;
 
   return (
-    <div style={{ marginTop: '20px' }}>
-      <label style={{ fontWeight: 'bold' }}>لون النقاط:</label>
-      <input
-        type="color"
-        onChange={(e) =>
-          onChangeColor.update({ dotsOptions: { color: e.target.value } })
-        }
-        style={{ marginLeft: '10px' }}
-      />
+    <div className="customize-container">
+      <div className="customize-card">
+        <label>Dot Color</label>
+        <input
+          type="color"
+          onChange={(e) => onChangeDotColor(e.target.value)}
+        />
+      </div>
 
-      <br /><br />
+      <div className="customize-card">
+        <label>Dot Shape</label>
+        <select onChange={(e) => onChangeDotShape(e.target.value)}>
+          <option value="rounded">Rounded</option>
+          <option value="dots">Dots</option>
+          <option value="square">Square</option>
+        </select>
+      </div>
 
-      <label style={{ fontWeight: 'bold' }}>شكل النقاط:</label>
-      <select
-        onChange={(e) =>
-          onChangeType.update({ dotsOptions: { type: e.target.value } })
-        }
-        style={{ marginLeft: '10px', padding: '5px' }}
-      >
-        <option value="rounded">Rounded</option>
-        <option value="dots">Dots</option>
-        <option value="square">Square</option>
-      </select>
+      <div className="customize-card">
+        <label>Background Color</label>
+        <input
+          type="color"
+          onChange={(e) => onChangeBgColor(e.target.value)}
+        />
+      </div>
 
-      <br /><br />
-
-      <label style={{ fontWeight: 'bold' }}>لون الخلفية:</label>
-      <input
-        type="color"
-        onChange={(e) =>
-          onChangeColor.update({ backgroundOptions: { color: e.target.value } })
-        }
-        style={{ marginLeft: '10px' }}
-      />
+      <div className="customize-card">
+        <label>QR Size (px)</label>
+        <input
+          type="range"
+          min="100"
+          max="500"
+          defaultValue="300"
+          step="10"
+          onChange={(e) => onChangeSize(parseInt(e.target.value))}
+        />
+      </div>
     </div>
   );
 };

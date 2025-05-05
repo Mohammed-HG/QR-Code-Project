@@ -1,7 +1,7 @@
 import React from "react";
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLink, faImage } from '@fortawesome/free-solid-svg-icons';
+import { faLink, faImage, faWifi, faTextHeight, faFileText } from '@fortawesome/free-solid-svg-icons';
 import '../styles/NavBar.css';
 
 const Mini_NavBar = ({ activeService, setActiveService }) => {
@@ -13,21 +13,21 @@ const Mini_NavBar = ({ activeService, setActiveService }) => {
             className={`tab-btn ${activeService === "linkQR" ? "active" : ""}`} 
             onClick={() => setActiveService("linkQR")}
           >
-            <FontAwesomeIcon icon={faLink} /> Link to QR
+            <FontAwesomeIcon icon={faLink} /> URL
           </button>
 
           <button 
-            className={`tab-btn ${activeService === "imageQR" ? "active" : ""}`}
-            onClick={() => setActiveService("imageQR")}
+            className={`tab-btn ${activeService === "TextQR" ? "active" : ""}`}
+            onClick={() => setActiveService("TextQR")}
           >
-            <FontAwesomeIcon icon={faImage} /> Image to QR
+            <FontAwesomeIcon icon={faFileText} /> Text
           </button>
 
           <button 
-            className={`tab-btn ${activeService === "other" ? "active" : ""}`}
-            onClick={() => setActiveService("other")}
+            className={`tab-btn ${activeService === "Wi-WifiQR" ? "active" : ""}`}
+            onClick={() => setActiveService("WifiQR")}
           >
-            Other
+            <FontAwesomeIcon icon={faWifi} /> Wi-Fi
           </button>
         </Nav>
       </Container>

@@ -14,7 +14,7 @@
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    max-width: 1000px;
+    width: 1000px;
     min-height: 600px;
   }
 
@@ -75,12 +75,12 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-.card- {
+.card-1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* عشان يغطّي كامل الشاشة */
-    background-color: #01050a; /* أو أي لون تحبه */
+    height: 120vh;
+    background-color: #01050adc;
     padding: 20px;
   }
   

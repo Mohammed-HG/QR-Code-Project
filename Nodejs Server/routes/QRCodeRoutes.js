@@ -1,47 +1,38 @@
 const express = require('express');
 const QRCode = require('qrcode');
-const multer = require('multer');
-const Tesseract = require('tesseract.js');
 
-const router = express.Router(); // Use the router
+const router = express.Router();
 
-// تهيئة Multer لحفظ الملفات في مجلد 'uploads'
-const upload = multer({ dest: 'uploads/' });
+router.post('/generate-qr', async (req, res) => {
+  const { text } = req.body;
 
-// Route لرفع صورة واستخراج النص منها
-router.post('/upload-image', upload.single('image'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No image uploaded!' });
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required!' });
   }
 
   try {
-    // استخراج النص من الصورة باستخدام Tesseract.js
-    const { data: { text } } = await Tesseract.recognize(
-      req.file.path,
-      'eng' // اللغة (الإنجليزية)
-    );
-
-    // إنشاء QR Code من النص المستخرج
     const qrImage = await QRCode.toDataURL(text);
-    res.json({ extractedText: text, qrCode: qrImage });
+    res.json({ qrCode: qrImage });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to process image' });
+    res.status(500).json({ error: 'Failed to generate QR Code' });
   }
 });
 
-router.post('/generate-qr', async (req, res) => {
-    const { text } = req.body;
+router.post('/generate-qr/wifi', async (req, res) => {
+  const { ssid, password, encryption } = req.body;
 
-    if (!text) {
-        return res.status(400).json({ error: 'Text is required!' });
-    }
+  if (!ssid || !encryption) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
 
-    try {
-        const qrImage = await QRCode.toDataURL(text);
-        res.json({ qrCode: qrImage });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to generate QR Code' });
-    }
+  const wifiData = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+
+  try {
+    const qrImage = await QRCode.toDataURL(wifiData);
+    res.json({ qrCode: qrImage });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to generate QR Code' });
+  }
 });
 
 module.exports = router;
