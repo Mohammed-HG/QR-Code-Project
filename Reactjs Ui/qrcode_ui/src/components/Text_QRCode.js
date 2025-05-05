@@ -21,10 +21,11 @@ const qrInstance = new QRCodeStyling({
   },
 });
 
-const Link_QRCode = ({ text, setText }) => {
-  const [qrData, setQrData] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const qrRef = useRef(null);
+const Text_QRCode = ({ text, setText }) => {
+
+    const [qrData, setQrData] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const qrRef = useRef(null)
 
   const generateQRFromText = async () => {
     try {
@@ -39,34 +40,27 @@ const Link_QRCode = ({ text, setText }) => {
     }
   };
 
-  useEffect(() => {
-    if (qrData && qrRef.current) {
-      qrRef.current.innerHTML = ''; // لمنع التكرار
-      qrInstance.append(qrRef.current);
-    }
-  }, [qrData]);
+    useEffect(() => {
+      if (qrData && qrRef.current) {
+        qrRef.current.innerHTML = ''; // لمنع التكرار
+        qrInstance.append(qrRef.current);
+      }
+    }, [qrData]);
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>QR Code Generator</h1>
-
+    <div>
+      <h1>Enter Text:</h1> 
+      <div className='br'>
       <input
         type="text"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Enter URL"
+        placeholder="Enter text"
         style={{ padding: '10px', width: '100%' }}
       />
-
-      {qrData && (
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <h3>Your QR Code:</h3>
-          <div ref={qrRef} />
-
-        </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default Link_QRCode;
+export default Text_QRCode;
