@@ -11,32 +11,33 @@
 .flex-container {
     display: flex;
     flex-direction: row;
-    background: white;
+    background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     width: 1000px;
-    min-height: 600px;
-  }
-
-.right-side {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    align-items: center;
-    background-color: #f5f5f5;
+    min-height: 500px;
+    margin: 20px auto;
+    overflow: hidden;
 }
 
 .left-side {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
-    height: 100vh;
-    background-color: #f5f5f5; 
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-right: 2px solid #e0e0e0;
 }
 
+.right-side {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background-color: #fefefe;
+}
   
 .tab-btn {
   width: 75x;
@@ -79,8 +80,29 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 120vh;
-    background-color: #01050adc;
+    min-height: 100vh;
+    background-color: #0e1420;
     padding: 20px;
-  }
-  
+}
+
+.right-side img {
+    margin-top: 20px;
+    max-width: 90%;
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
