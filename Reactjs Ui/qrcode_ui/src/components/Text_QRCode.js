@@ -1,66 +1,69 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
-import QRCodeStyling from 'qr-code-styling';
 
-const qrInstance = new QRCodeStyling({
-  width: 300,
-  height: 300,
-  type: 'canvas',
-  data: '',
-  image: '',
-  dotsOptions: {
-    color: '#000000',
-    type: 'rounded'
-  },
-  backgroundOptions: {
-    color: '#ffffff',
-  },
-  imageOptions: {
-    crossOrigin: "anonymous",
-    margin: 10,
-  },
-});
+const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
 
-const Text_QRCode = ({ text, setText }) => {
+  const [qrData] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const qrRef = useRef(null);
 
-    const [qrData, setQrData] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const qrRef = useRef(null)
-
-  const generateQRFromText = async () => {
+  const TextToQRCode = async () => {
+    if (!text) return;
     try {
       setIsLoading(true);
-      await axios.post('http://localhost:3200/qr/generate-qr', { text });
-      setQrData(text);
-      qrInstance.update({ data: text });
-    } catch (error) {
+      const response = await axios.post(
+        'http://localhost:3200/qr/generate-qr',
+        { text },
+        { responseType: 'blob' }
+      );
+      const blob = response.data;
+      const imageUrl = URL.createObjectURL(blob);
+      setQrData(imageUrl);
+    } catch (err) {
       alert('Failed to generate QR Code!');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  useImperativeHandle(ref, () => ({
+    generate: TextToQRCode,
+    loading: isLoading,
+    disabled: !text,
+    download: () => {
+      if (!qrData) return;
+      const a = document.createElement('a');
+      a.href = qrData;
+      a.download = 'qr-code.png';
+      a.click();
+    }
+  }), [text, isLoading, qrData]);
+  
+    // مجرد عرض الصورة
     useEffect(() => {
       if (qrData && qrRef.current) {
-        qrRef.current.innerHTML = ''; // لمنع التكرار
-        qrInstance.append(qrRef.current);
+        qrRef.current.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = qrData;
+        qrRef.current.appendChild(img);
       }
     }, [qrData]);
 
   return (
-    <div>
-      <h1>Enter Text:</h1> 
-      <div className='br'>
+    <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
+      <h2>Link to QR Code</h2>
+
       <input
         type="text"
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Enter text"
-        style={{ padding: '10px', width: '100%' }}
+        onChange={e => setText(e.target.value)}
+        placeholder="Enter Text"
+        style={{ width: '100%', padding: 10, marginBottom: 10 }}
       />
-      </div>
+      
     </div>
   );
-};
+});
 
 export default Text_QRCode;

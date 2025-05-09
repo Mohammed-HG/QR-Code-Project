@@ -1,72 +1,69 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import axios from 'axios';
-import QRCodeStyling from 'qr-code-styling';
 
-const qrInstance = new QRCodeStyling({
-  width: 300,
-  height: 300,
-  type: 'canvas',
-  data: '',
-  image: '',
-  dotsOptions: {
-    color: '#000000',
-    type: 'rounded'
-  },
-  backgroundOptions: {
-    color: '#ffffff',
-  },
-  imageOptions: {
-    crossOrigin: "anonymous",
-    margin: 10,
-  },
-});
+const Link_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
 
-const Link_QRCode = ({ text, setText }) => {
-  const [qrData, setQrData] = useState('');
+  const [qrData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const qrRef = useRef(null);
 
   const generateQRFromText = async () => {
+    if (!text) return;
     try {
       setIsLoading(true);
-      await axios.post('http://localhost:3200/qr/generate-qr', { text });
-      setQrData(text);
-      qrInstance.update({ data: text });
-    } catch (error) {
+      const response = await axios.post(
+        'http://localhost:3200/qr/generate-qr',
+        { text },
+        { responseType: 'blob' }
+      );
+      const blob = response.data;
+      const imageUrl = URL.createObjectURL(blob);
+      setQrData(imageUrl);
+    } catch (err) {
       alert('Failed to generate QR Code!');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (qrData && qrRef.current) {
-      qrRef.current.innerHTML = ''; // لمنع التكرار
-      qrInstance.append(qrRef.current);
+  useImperativeHandle(ref, () => ({
+    generate: generateQRFromText,
+    loading: isLoading,
+    disabled: !text,
+    download: () => {
+      if (!qrData) return;
+      const a = document.createElement('a');
+      a.href = qrData;
+      a.download = 'qr-code.png';
+      a.click();
     }
-  }, [qrData]);
+  }), [text, isLoading, qrData]);
+  
+    // مجرد عرض الصورة
+    useEffect(() => {
+      if (qrData && qrRef.current) {
+        qrRef.current.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = qrData;
+        qrRef.current.appendChild(img);
+      }
+    }, [qrData]);
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>QR Code Generator</h1>
+    <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
+      <h2>Link to QR Code</h2>
 
       <input
         type="text"
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={e => setText(e.target.value)}
         placeholder="Enter URL"
-        style={{ padding: '10px', width: '100%' }}
+        style={{ width: '100%', padding: 10, marginBottom: 10 }}
       />
-
-      {qrData && (
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <h3>Your QR Code:</h3>
-          <div ref={qrRef} />
-
-        </div>
-      )}
+      
     </div>
   );
-};
+});
 
 export default Link_QRCode;

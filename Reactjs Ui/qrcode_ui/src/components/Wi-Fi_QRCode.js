@@ -1,65 +1,83 @@
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
+import axios from 'axios';
 
+const Wifi_QRCode = ({
+  ssid, setSsid,
+  password, setPassword,
+  encryption, setEncryption
+}) => {
+  const [qrData, setQrData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const generateWifiQR = async () => {
+    if (!ssid || (encryption !== 'nopass' && !password)) return;
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        'http://localhost:3200/qr/generate-qr/wifi',
+        { ssid, password, encryption },
+        { responseType: 'blob' }
+      );
+      const blob = response.data;
+      setQrData(URL.createObjectURL(blob));
+    } catch (err) {
+      alert('Failed to generate Wi-Fi QR!');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-const Wifi_QRCode = () => {
+  return (
+    <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
+      <h2>Wi-Fi QR Code</h2>
 
-    const [ssid, setSsid] = useState("");
-    const [password, setPassword] = useState("");
-    const [encryption, setEncryption] = useState("WPA");
-    const [isLoading, setIsLoading] = useState(false);
+      <input
+        type="text"
+        placeholder="SSID"
+        value={ssid}
+        onChange={e => setSsid(e.target.value)}
+        style={{ width: '100%', padding: 10, marginBottom: 10 }}
+      />
 
-    const handleQRtoWifi = async () => {
-        try {
-          setIsLoading(true);
-          const response = await axios.post('http://localhost:3200/qr/generate-qr/wifi', {
-            ssid,
-            password,
-            encryption
-          }, {
-            responseType: 'blob'  // عشان تستلم صورة
-          });
+      {encryption !== 'nopass' && (
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          style={{ width: '100%', padding: 10, marginBottom: 10 }}
+        />
+      )}
 
-          const blob = response.data;
-          const imageUrl = URL.createObjectURL(blob);
-          // هنا تقدر تعرض الصورة مثل <img src={imageUrl} />
-          console.log("QR Image URL:", imageUrl);
-        } catch (err) {
-          console.error("Error generating Wi-Fi QR:", err);
-        } finally {
-          setIsLoading(false);
+      <select
+        value={encryption}
+        onChange={e => setEncryption(e.target.value)}
+        style={{ width: '100%', padding: 10, marginBottom: 10 }}
+      >
+        <option value="WPA">WPA/WPA2</option>
+        <option value="WEP">WEP</option>
+        <option value="nopass">No Password</option>
+      </select>
+
+      <button
+        onClick={generateWifiQR}
+        disabled={
+          isLoading ||
+          !ssid ||
+          (encryption !== 'nopass' && !password)
         }
-      };
+      >
+        {isLoading ? 'Generating…' : 'Generate Wi-Fi QR'}
+      </button>
 
-    return (
-        <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-            <h2>Wi-Fi QR Code Generator</h2>
-
-            <input 
-                type="text"
-                placeholder="SSID"
-                value={ssid}
-                onChange={(e) => setSsid(e.target.value)}
-            />
-
-            <input 
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            
-            <select
-                value={encryption}
-                onChange={(e) => setEncryption(e.target.value)}
-            >
-                <option value="WPA">WPA/WPA2</option>
-                <option value="WEP">WEP</option>
-                <option value="nopass">No Password</option>
-            </select>
+      {qrData && (
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <img src={qrData} alt="Wi-Fi QR Code" style={{ maxWidth: '100%' }} />
         </div>
-    )
-}
+      )}
+    </div>
+  );
+};
 
 export default Wifi_QRCode;

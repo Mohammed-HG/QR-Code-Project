@@ -18,14 +18,14 @@ const Mini_NavBar = ({ activeService, setActiveService }) => {
 
           <button 
             className={`tab-btn ${activeService === "TextQR" ? "active" : ""}`}
-            onClick={() => setActiveService("TextQR")}
+            onClick={() => setActiveService("textQR")}
           >
             <FontAwesomeIcon icon={faFileText} /> Text
           </button>
 
           <button 
             className={`tab-btn ${activeService === "Wi-WifiQR" ? "active" : ""}`}
-            onClick={() => setActiveService("WifiQR")}
+            onClick={() => setActiveService("wifiQR")}
           >
             <FontAwesomeIcon icon={faWifi} /> Wi-Fi
           </button>
