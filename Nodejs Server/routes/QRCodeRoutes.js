@@ -58,14 +58,23 @@ router.post('/generate-qr/wifi', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const wifiData = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+    // بناء نص Wi-Fi بناءً على نوع التشفير
+    let wifiData = `WIFI:T:${encryption === 'nopass' ? 'nopass' : 'WPA'};S:${ssid};`;
 
-  try {
-    const qrImage = await QRCode.toDataURL(wifiData);
-    res.json({ qrCode: qrImage });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to generate QR Code' });
-  }
+    if (encryption !== "nopass") {
+        wifiData += `P:${password};`;
+    }
+
+    wifiData += ";";
+
+    try {
+        const buffer = await QRCode.toBuffer(wifiData);
+        res.set("Content-Type", "image/png");
+        res.send(buffer);
+    } catch (err) {
+        console.error("Error generating QR code:", err);
+        res.status(500).end();
+    }
 });
 
 module.exports = router;
