@@ -1,19 +1,18 @@
 import React from "react";
+import '../styles/Customize.css';
 
 const Buttons = ({ onDownload, onGenerate, isLoading, disabled, generateText = "Generate QR" }) => {
     return (
         <div>
-          <button
+          <button className="button-1"
             onClick={onGenerate}
             disabled={disabled || isLoading}
-            style={{ padding: '10px 20px', marginRight: '10px' }}
           >
             {isLoading ? 'Generating...' : generateText}
           </button>
     
-          <button
+          <button className="button-2"
             onClick={onDownload}
-            style={{ padding: '10px 20px', background: '#007bff', color: 'white' }}
           >
             Download QR
           </button>

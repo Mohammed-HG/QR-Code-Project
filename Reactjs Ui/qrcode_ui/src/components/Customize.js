@@ -50,7 +50,7 @@ const Customize = ({ text, setQrData }) => {
             </div>
             <div className="customize-card">
                 <label>QR Size (px)</label>
-                <input type="range" min="100" max="1000" value={size} onChange={(e) => setSize(parseInt(e.target.value))} />
+                <input type="range" min="100" max="1500" value={size} onChange={(e) => setSize(parseInt(e.target.value))} />
             </div>
         </div>
     );

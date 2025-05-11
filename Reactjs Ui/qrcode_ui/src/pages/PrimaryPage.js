@@ -92,15 +92,16 @@ const PrimaryPage = () => {
   };
 
   return (
-    <>
+      <div className="card-1">
       <Mini_NavBar
         activeService={activeService}
         setActiveService={setActiveService}
       />
-      <div className="card-1">
         <div className="flex-container">
           <div className="left-side">
             {renderService()}
+            <br/><br/>
+            <h4>Customize QR Code</h4>
             <Customize text={text} setQrData={setQrData} />
 
           </div>
@@ -121,7 +122,6 @@ const PrimaryPage = () => {
           </div>
         </div>
       </div>
-    </>
   );
 };
 

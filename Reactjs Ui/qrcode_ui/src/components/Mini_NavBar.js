@@ -6,7 +6,7 @@ import '../styles/NavBar.css';
 
 const Mini_NavBar = ({ activeService, setActiveService }) => {
   return (
-    <Navbar bg="dark" variant="dark" expand={false}>
+    <Navbar variant="dark" expand={false}>
       <Container>
           <Nav className="flex-row">
           <button 

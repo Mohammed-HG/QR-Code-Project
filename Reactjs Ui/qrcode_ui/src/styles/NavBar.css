@@ -44,7 +44,20 @@
     left: 0;
     width: 100%; /* أو العرض اللي تبيه للقائمة */
     height: 15vh;
-    border-right: 1px solid #ccc; /* خط فاصل اختياري */
     padding-top: 10px; /* مسافة خفيفة داخلية */
   }
+
+.tab-btn {
+    width: 75x;
+    padding: 10px;
+    background-color: #343a40;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.5s ease;
+}
   
+.tab-btn:hover {
+    background: #333;
+}

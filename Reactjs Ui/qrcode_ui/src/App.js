@@ -16,12 +16,12 @@ function App() {
     <Router>
       <NavBar />
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path='/PrimaryPage' element={<PrimaryPage />} />
+        <Route path='/' element={<PrimaryPage />} />
         <Route path='/Login' element={<LoginPage />} />
         <Route path='/Register' element={<RegisterPage />} />
         <Route path='/Link_GRCode' element={<Link_GRCode />} />
         <Route path='/Text_QRCode' element={<Text_QRCode />} />
+        <Route path="/about" element={<HomePage />} />
       </Routes>
     </Router>
   );
