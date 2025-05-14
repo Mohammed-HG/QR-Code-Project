@@ -53,13 +53,13 @@ const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
 
   return (
     <div className='QR_style'>
-      <h2>Link to QR Code</h2>
+      <h2>Text to QR Code</h2>
 
       <input
         type="text"
         value={text}
         onChange={e => setText(e.target.value)}
-        placeholder="Enter Text"
+        placeholder="Enter Text Here"
         style={{ width: '100%', padding: 10, marginBottom: 10 }}
       />
       

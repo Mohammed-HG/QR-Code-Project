@@ -58,10 +58,19 @@ const Link_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
       <input
         type="text"
         value={text}
-        onChange={e => setText(e.target.value)}
-        placeholder="Enter URL"
+        onChange={(e) => {
+          const value = e.target.value;
+          const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/\S*)?$/;
+          if (value === '' || urlPattern.test(value)) {
+            setText(value);
+          } else {
+            alert("Only can add URL");
+          }
+        }}
+        placeholder="Enter URL only"
         style={{ width: '100%', padding: 10, marginBottom: 10 }}
       />
+
 
     </div>
   );
