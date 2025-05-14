@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import '../styles/QRCode_generator.css'
 import axios from 'axios';
 
 const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
@@ -51,7 +52,7 @@ const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
     }, [qrData]);
 
   return (
-    <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
+    <div className='QR_style'>
       <h2>Link to QR Code</h2>
 
       <input

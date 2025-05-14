@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import '../styles/QRCode_generator.css'
 import axios from 'axios';
 
 const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encryption, setEncryption, setQrData }, ref) => {
@@ -49,7 +50,7 @@ const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encrypti
     }, [qrRef, setQrData]);
 
     return (
-        <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
+        <div className='QR_style'>
             <h2>Wi-Fi QR Code</h2>
 
             <input
