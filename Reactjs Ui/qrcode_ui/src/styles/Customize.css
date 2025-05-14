@@ -31,6 +31,14 @@
     border: 1px solid #cccccc;
     border-radius: 6px;
 }
+
+.buttons-container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
   
 .button-1,
 .button-2 {
@@ -51,4 +59,3 @@
 .button-2:hover {
   background: #00c795d8
 }
-

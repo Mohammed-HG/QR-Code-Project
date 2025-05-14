@@ -5,6 +5,7 @@ import "../styles/PrimaryPage.css";
 import LinkQR from "../components/Link_QRCode";
 import TextQR from "../components/Text_QRCode";
 import WifiQR from "../components/Wi-Fi_QRCode";
+import LocateQR from "../components//Location_QRCode"
 import Buttons from "../components/Buttons";
 import Customize from "../components/Customize";
 
@@ -21,6 +22,7 @@ const PrimaryPage = () => {
   const linkRef = useRef();
   const textRef = useRef();
   const wifiRef = useRef();
+  const locateRef = useRef();
 
   const handleGenerateQR = () => {
     if (activeService === "linkQR" && linkRef.current) {
@@ -31,6 +33,9 @@ const PrimaryPage = () => {
     }
     if (activeService === "wifiQR" && wifiRef.current) {
       wifiRef.current.generate();
+    }
+    if (activeService === "locateQR" && locateRef.current) {
+      locateRef.current.generate();
     }
   };
 
@@ -46,12 +51,14 @@ const PrimaryPage = () => {
   const isLoading =
     (activeService === "linkQR" && linkRef.current?.loading) ||
     (activeService === "textQR" && textRef.current?.loading) ||
-    (activeService === "wifiQR" && wifiRef.current?.loading);
+    (activeService === "wifiQR" && wifiRef.current?.loading) ||
+    (activeService === "locateQR" && locateRef.current?.loading);
 
   const disabled =
     (activeService === "linkQR" && linkRef.current?.disabled) ||
     (activeService === "textQR" && textRef.current?.disabled) ||
-    (activeService === "wifiQR" && wifiRef.current?.disabled);
+    (activeService === "wifiQR" && wifiRef.current?.disabled) ||
+    (activeService === "locateQR" && locateRef.current?.disabled);
 
   const renderService = () => {
     switch (activeService) {
@@ -86,6 +93,13 @@ const PrimaryPage = () => {
             setQrData={setQrData}
           />
         );
+        case "locateQR":
+          return (
+            <LocateQR 
+              ref={locateRef}
+              setQrData={setQrData}
+            />  
+          )
       default:
         return null;
     }

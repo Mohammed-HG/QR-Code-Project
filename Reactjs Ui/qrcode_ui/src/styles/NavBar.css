@@ -47,6 +47,14 @@
     padding-top: 10px; /* مسافة خفيفة داخلية */
   }
 
+  .buttons-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 .tab-btn {
     width: 75x;
     padding: 10px;

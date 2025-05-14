@@ -3,7 +3,7 @@ import '../styles/Customize.css';
 
 const Buttons = ({ onDownload, onGenerate, isLoading, disabled, generateText = "Generate QR" }) => {
     return (
-        <div>
+        <div className="buttons-container">
           <button className="button-1"
             onClick={onGenerate}
             disabled={disabled || isLoading}

@@ -77,4 +77,17 @@ router.post('/generate-qr/wifi', async (req, res) => {
     }
 });
 
+router.post('/generate-qr/location', async (req, res) => {
+  const { locationData } = req.body;
+  if (!locationData) return res.status(400).json({ error: 'Missing required fields' });
+
+  try {
+      const buffer = await QRCode.toBuffer(locationData);
+      res.set('Content-Type', 'image/png');
+      res.send(buffer);
+  } catch (err) {
+      res.status(500).end();
+  }
+});
+
 module.exports = router;
