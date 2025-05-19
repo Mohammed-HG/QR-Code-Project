@@ -1,5 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle, useEffect, useRef } from 'react';
 import axios from 'axios';
+import MessageModal from './MessageModal';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -17,6 +18,12 @@ const LocationQR = forwardRef(({ setQrData }, ref) => {
     const [isLoading, setIsLoading] = useState(false);
     const qrRef = useRef();
 
+    const [modalShow, setModalShow] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalFooter, setModalFooter] = useState('');  
+    const handleClose = () => setModalShow(false);
+
     const generateLocationQR = async () => {
         const [latitude, longitude] = position;
         const locationData = `geo:${latitude},${longitude}`;
@@ -32,14 +39,16 @@ const LocationQR = forwardRef(({ setQrData }, ref) => {
             const blob = response.data;
             const imageUrl = URL.createObjectURL(blob);
             setQrData(imageUrl);
-        } catch (err) {
-            alert('Failed to generate QR Code!');
+          } catch (err) {
+            setModalTitle('Error');
+            setModalMessage('Failed to generate QR Code!');
+            setModalFooter('error code: 500');
+            setModalShow(true);
             console.error(err);
-        } finally {
+          } finally {
             setIsLoading(false);
-        }
-    };
-
+          }
+        };
 
     useImperativeHandle(ref, () => ({
         generate: generateLocationQR,
@@ -82,6 +91,14 @@ const LocationQR = forwardRef(({ setQrData }, ref) => {
           <div className="qr-container">
             <img ref={qrRef} style={{ maxWidth: '100%', borderRadius: '16px', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)' }} />
           </div>
+
+          <MessageModal
+            show={modalShow}
+            handleClose={handleClose}
+            title={modalTitle}
+            message={modalMessage}
+            footer={modalFooter}
+          />
         </div>
       );
     });

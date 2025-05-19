@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import MessageModal from './MessageModal';
 import '../styles/QRCode_generator.css'
 import axios from 'axios';
 
@@ -7,6 +8,12 @@ const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
   const [qrData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const qrRef = useRef(null);
+
+  const [modalShow, setModalShow] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalFooter, setModalFooter] = useState('');
+  const handleClose = () => setModalShow(false);
 
   const TextToQRCode = async () => {
     if (!text) return;
@@ -21,7 +28,10 @@ const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
       const imageUrl = URL.createObjectURL(blob);
       setQrData(imageUrl);
     } catch (err) {
-      alert('Failed to generate QR Code!');
+      setModalTitle('Error');
+      setModalMessage('Failed to generate QR Code!');
+      setModalFooter('error code: 500');
+      setModalShow(true);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -63,6 +73,14 @@ const Text_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
         style={{ width: '100%', padding: 10, marginBottom: 10 }}
       />
       
+      <MessageModal
+        show={modalShow}
+        handleClose={handleClose}
+        title={modalTitle}
+        message={modalMessage}
+        footer={modalFooter}
+      />
+
     </div>
   );
 });

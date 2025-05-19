@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import MessageModal from './MessageModal';
 import '../styles/QRCode_generator.css'
 import axios from 'axios';
 
@@ -9,6 +10,12 @@ const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encrypti
     const [showPassword, setShowPassword] = useState(false);
     const [qrData] = useState('');
     const qrRef = useRef();
+
+    const [modalShow, setModalShow] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalFooter, setModalFooter] = useState(''); 
+    const handleClose = () => setModalShow(false);
 
     const generateWifiQR = async () => {
         if (!ssid || (encryption !== 'nopass' && !password)) return;
@@ -22,13 +29,16 @@ const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encrypti
             const blob = response.data;
             const imageUrl = URL.createObjectURL(blob);
             setQrData(imageUrl);
-        } catch (err) {
-            alert('Failed to generate QR Code!');
+          } catch (err) {
+            setModalTitle('Error');
+            setModalMessage('Failed to generate QR Code!');
+            setModalFooter('error code: 500');
+            setModalShow(true);
             console.error(err);
-        } finally {
+          } finally {
             setIsLoading(false);
-        }
-    };
+          }
+        };
 
     useImperativeHandle(ref, () => ({
       generate: generateWifiQR,
@@ -50,73 +60,81 @@ const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encrypti
     }, [qrRef, setQrData]);
 
     return (
-        <div className='QR_style'>
-            <h2>Wi-Fi QR Code</h2>
+      <div className='QR_style'>
+        <h2>Wi-Fi QR Code</h2>
 
+          <input
+              type="text"
+              placeholder="SSID"
+              value={ssid}
+              onChange={e => setSsid(e.target.value)}
+              style={{ width: '100%', padding: 10, marginBottom: 10 }}
+          />
+
+        {encryption !== "nopass" && (
+          <div style={{ position: "relative", width: "100%", marginBottom: 10 }}>
             <input
-                type="text"
-                placeholder="SSID"
-                value={ssid}
-                onChange={e => setSsid(e.target.value)}
-                style={{ width: '100%', padding: 10, marginBottom: 10 }}
-            />
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 40px 10px 10px", // ترك مساحة للأيقونة
+                boxSizing: "border-box", // لضمان أن padding لا يؤثر على العرض
+          }}/>
 
-          {encryption !== "nopass" && (
-            <div style={{ position: "relative", width: "100%", marginBottom: 10 }}>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 40px 10px 10px", // ترك مساحة للأيقونة
-                  boxSizing: "border-box", // لضمان أن padding لا يؤثر على العرض
-                }}              />
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  cursor: "pointer",
-                }}
-              >
-                {showPassword ? <FontAwesomeIcon icon={faEyeSlash} /> : <FontAwesomeIcon icon={faEye} />} {/* رمز العين للكشف عن الباسوورد */}
-              </span>
-            </div>
-          )}
-
-            <button
-              type="button"
+            <span
               onClick={() => setShowPassword(!showPassword)}
               style={{
-                position: 'absolute',
-                right: 10,
-                top: 10,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 16,
-              }}>
-              {showPassword ? '🙈' : '👁️'}
-            </button>
-
-            <select
-                value={encryption}
-                onChange={e => setEncryption(e.target.value)}
-                style={{ width: '100%', padding: 10, marginBottom: 10 }}
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+              }}
             >
-                <option value="WPA">WPA/WPA2-Personal</option>
-                <option value="WEP">WEP</option>
-                <option value="nopass">No Password</option>
-            </select>
-
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
+              {showPassword ? <FontAwesomeIcon icon={faEyeSlash} /> : <FontAwesomeIcon icon={faEye} />} {/* رمز العين للكشف عن الباسوورد */}
+            </span>
           </div>
-        </div>
-    );
+        )}
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: 'absolute',
+              right: 10,
+              top: 10,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 16,
+            }}>
+          </button>
+
+          <select
+            value={encryption}
+            onChange={e => setEncryption(e.target.value)}
+            style={{ width: '100%', padding: 10, marginBottom: 10 }}
+          >
+            <option value="WPA">WPA/WPA2-Personal</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">No Password</option>
+          </select>
+
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+      </div>
+
+      <MessageModal
+        show={modalShow}
+        handleClose={handleClose}
+        title={modalTitle}
+        message={modalMessage}
+        footer={modalFooter}
+      />
+    </div>
+  );
 });
 
 export default Wifi_QRCode;

@@ -21,17 +21,16 @@ const DarkButton = styled(Button)`
   }
 `;
 
-const MessageModal = ({ show, handleClose, title, message }) => {
+const MessageModal = ({ show, handleClose, title, message, footer }) => {
   return (
     <DarkModal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>
-      <Modal.Footer>
-        <DarkButton onClick={handleClose}>
-          Close
-        </DarkButton>
+      <Modal.Footer className="custom-footer">
+        <div className="footer-left">{footer}</div>
+        <DarkButton onClick={handleClose}>Close</DarkButton>
       </Modal.Footer>
     </DarkModal>
   );

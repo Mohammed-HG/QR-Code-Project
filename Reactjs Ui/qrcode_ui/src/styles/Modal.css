@@ -18,5 +18,15 @@
     text-align: center;
   }
 
-  
+  .custom-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    width: 100%;
+    align-items: center;
+}
+
+.footer-left {
+    flex-grow: 1;
+    text-align: left;
+}
   
