@@ -4,11 +4,15 @@
     "dev": "nodemon QRCode_Server.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.14.1",
     "qrcode": "^1.5.4",
     "tesseract.js": "^6.0.0"
   },
