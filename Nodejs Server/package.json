@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node QRCode_Server.js",
+    "dev": "nodemon QRCode_Server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
