@@ -1,0 +1,24 @@
+#  Users node version 22.2 as our base image
+FROM node:22.2 AS build
+
+# Goes to the app directory (think of it like a cd terminal command)
+WORKDIR /app
+
+# Copy package.json and package-lock.json (if available)
+COPY package*.json ./
+
+# Copy the rest of app into the container
+COPY . .
+
+# Install app dependencies
+RUN npm install --force
+RUN npm run build
+
+# خادم Nginx لتقديم الملفات
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+
+#Expose the port so our computer can access it 
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

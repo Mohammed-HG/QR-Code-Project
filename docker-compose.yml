@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  backend:
+    build: ./Nodejs Server
+    ports:
+      - "3200:3200"
+    env_file:
+      - ./Nodejs Server/.env
+    networks:
+      - qrcode_net
+
+  frontend:
+    build: ./Reactjs Ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - qrcode_net
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 7253MHG7253mhg@!
+      MYSQL_DATABASE: qrcode_project
+    ports:
+      - "3306:3306"
+    networks:
+      - qrcode_net
+
+networks:
+  qrcode_net:
+
