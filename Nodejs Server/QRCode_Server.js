@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 
-require('dotenv').config({ path: './QR-Code-Project/Nodejs Server/.env'});
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT;
