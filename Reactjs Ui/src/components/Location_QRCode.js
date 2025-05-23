@@ -14,6 +14,9 @@ L.Icon.Default.mergeOptions({
 });
 
 const LocationQR = forwardRef(({ setQrData }, ref) => {
+    
+  const apiUrl = process.env.REACT_APP_API_URL;
+
     const [position, setPosition] = useState([25.383, 49.586]); // الأحساء بشكل افتراضي
     const [isLoading, setIsLoading] = useState(false);
     const qrRef = useRef();
@@ -32,7 +35,7 @@ const LocationQR = forwardRef(({ setQrData }, ref) => {
             setIsLoading(true);
             const locationData = `geo:${latitude},${longitude}`;
             const response = await axios.post(
-                'http://localhost:3200/qr/generate-qr/location',
+                `${apiUrl}/qr/generate-qr/location`,
                 { locationData },
                 { responseType: 'blob' }
             );

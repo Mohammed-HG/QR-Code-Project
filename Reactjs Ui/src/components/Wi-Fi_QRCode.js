@@ -6,6 +6,9 @@ import '../styles/QRCode_generator.css'
 import axios from 'axios';
 
 const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encryption, setEncryption, setQrData }, ref) => {
+
+  const apiUrl = process.env.REACT_APP_API_URL;
+  
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [qrData] = useState('');
@@ -22,7 +25,7 @@ const Wifi_QRCode = forwardRef(({ ssid, setSsid, password, setPassword, encrypti
         try {
             setIsLoading(true);
             const response = await axios.post(
-                'http://localhost:3200/qr/generate-qr/wifi',
+                `${apiUrl}/qr/generate-qr/wifi`,
                 { ssid, password, encryption },
                 { responseType: 'blob' }
             );

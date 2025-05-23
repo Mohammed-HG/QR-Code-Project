@@ -5,6 +5,8 @@ import axios from 'axios';
 
 const Link_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const [qrData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const qrRef = useRef(null);
@@ -20,7 +22,7 @@ const Link_QRCode = forwardRef(({ text, setText, setQrData }, ref) => {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        'http://localhost:3200/qr/generate-qr',
+        `${apiUrl}/qr/generate-qr`,
         { text },
         { responseType: 'blob' }
       );
