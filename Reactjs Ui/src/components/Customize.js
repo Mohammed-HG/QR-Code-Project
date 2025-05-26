@@ -3,6 +3,9 @@ import axios from "axios";
 import '../styles/Customize.css';
 
 const Customize = ({ text, setQrData }) => {
+
+    const apiUrl = process.env.REACT_APP_API_URL;
+
     const [dotColor, setDotColor] = useState("#000000");
     const [bgColor, setBgColor] = useState("#ffffff");
     const [dotShape, setDotShape] = useState("rounded");
@@ -12,7 +15,7 @@ const Customize = ({ text, setQrData }) => {
         const generateCustomizedQR = async () => {
             if (!text) return;
             try {
-                const response = await axios.post("http://localhost:3200/qr/customize-qr", {
+                const response = await axios.post(`${apiUrl}/qr/customize-qr`, {
                     text,
                     dotColor,
                     dotShape,
@@ -41,7 +44,7 @@ const Customize = ({ text, setQrData }) => {
                 <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
             </div>
             <div className="customize-card">
-                <label>Dot Shape</label>
+                <label>Dot Shape (Not working)</label>
                 <select value={dotShape} onChange={(e) => setDotShape(e.target.value)}>
                     <option value="rounded">Rounded</option>
                     <option value="dots">Dots</option>
