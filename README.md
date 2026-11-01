@@ -1,6 +1,8 @@
 # QR Code Project
 
-A responsive QR generator for links, text, Wi-Fi networks and locations, with PNG downloads and email-verified accounts. Colors and size apply to the selected content. No uploaded images or saved-code library are advertised or implemented.
+A responsive QR generator for links, text, Wi-Fi networks and locations, with styled PNG downloads and email-verified accounts. Six QR patterns, two-color gradients, transparent backgrounds and safe logo overlays are available. The UI includes Arabic/English, light/dark themes, editable profiles and a secured administrator dashboard with a visual editor.
+
+See [Customization and administration](docs/CUSTOMIZATION_ADMIN.md) for features and initial local administrator setup.
 
 ## Security upgrade — deployment action required
 
@@ -93,7 +95,7 @@ SMTP uses SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD and SMTP_FROM. Use SMTP
 | POST | /qr/generate-qr | kind=url/text/wifi/location plus service fields and colors/size |
 | GET | /healthz, /readyz | liveness and database readiness |
 
-QR: text/URL uses text; Wi-Fi uses ssid/password/encryption; location uses numeric latitude/longitude. Shared options are dotColor, bgColor and integer size (256–1024). Unsupported dot shapes are rejected. Legacy QR endpoint aliases accept these same validated fields. All successful QR responses are image/png; errors are JSON with error.
+QR: text/URL uses text; Wi-Fi uses ssid/password/encryption; location uses numeric latitude/longitude. Shared options are dotColor, bgColor and integer size (256–1024). Supported dotShape values are square, dots, rounded, diamond, soft and vertical. Optional styling: dotGradient/dotColor2, bgGradient/bgColor2, gradientAngle (0/45/90/135), transparent, and a bounded PNG/JPEG/WebP data URL in logo. Legacy QR endpoint aliases accept these same validated fields. All successful QR responses are image/png; errors are JSON with error.
 
 ## Validation
 

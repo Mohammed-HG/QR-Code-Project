@@ -33,6 +33,16 @@ export function AuthProvider({ children }) {
       throw err;
     }
   }
-  return <Auth.Provider value={{ user: session?.user, loading, error, login, logout }}>{children}</Auth.Provider>;
+  async function api(url,options={}) {
+    try { return await request(url,{...options,csrfToken:session?.csrfToken}); }
+    catch(error){if(error.status===401)setSession(null);throw error;}
+  }
+  async function saveProfile(body) {
+    revision.current+=1;
+    const result=await api('/api/users/me',{method:'POST',body});
+    if(result.reauthenticate)setSession(null);else setSession(result);
+    return result;
+  }
+  return <Auth.Provider value={{ user: session?.user, loading, error, login, logout, api, saveProfile }}>{children}</Auth.Provider>;
 }
 export const useAuth = () => useContext(Auth);

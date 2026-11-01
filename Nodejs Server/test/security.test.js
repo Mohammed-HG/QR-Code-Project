@@ -100,7 +100,7 @@ test('malformed input, object credentials and oversized bodies fail safely', asy
   await request(f.app).post('/api/login').send({ username: 'person', password: 'invalid' }).expect(401);
   await request(f.app).post('/api/login').send({ username: 'person', password: '🔑'.repeat(20) }).expect(400);
   await request(f.app).post('/api/register').set('Content-Type', 'application/json').send('{').expect(400);
-  await request(f.app).post('/qr/generate-qr').send({ text: 'a'.repeat(14000) }).expect(413);
+  await request(f.app).post('/qr/generate-qr').send({ text: 'a'.repeat(420000) }).expect(413);
   await request(f.app).post('/qr/generate-qr').send({ kind: 'text', text: 'ok', size: 999999 }).expect(400);
   await request(f.app).post('/qr/generate-qr').send({ kind: 'wifi', ssid: 'office', encryption: 'WPA' }).expect(400);
   await request(f.app).post('/qr/generate-qr').send({ kind: 'location', latitude: '', longitude: 0 }).expect(400);

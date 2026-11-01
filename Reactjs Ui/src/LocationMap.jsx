@@ -1,9 +1,11 @@
+import { usePreferences } from './preferences';
 import { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
 import markerUrl from 'leaflet/dist/images/marker-icon.png';
 import marker2xUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 export default function LocationMap({ latitude, longitude, onChange }) {
+  const {t}=usePreferences();
   const element = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -38,5 +40,5 @@ export default function LocationMap({ latitude, longitude, onChange }) {
       mapRef.current.panTo([latitude, longitude], { animate: false });
     }
   }, [latitude, longitude]);
-  return <div ref={element} className="location-map" role="region" aria-label="Location map. You can also enter coordinates in the fields above." />;
+  return <div ref={element} className="location-map" role="region" aria-label={t('Location map. You can also enter coordinates in the fields above.')} />;
 }

@@ -7,6 +7,7 @@ const v = require('./lib/validation');
 const { HttpError } = require('./lib/errors');
 const { equalHash } = require('./repository');
 const { render } = require('./lib/qr');
+const { copyDefaults, validateSettings } = require('./site-settings');
 const randomToken = () => randomBytes(32).toString('hex');
 const hash = value => createHash('sha256').update(value).digest('hex');
 
@@ -33,7 +34,10 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
     }
     next();
   });
+  app.use('/qr', express.json({ limit: '400kb', strict: true }));
+  app.use('/api/admin/settings', express.json({ limit: '32kb', strict: true }));
   app.use(express.json({ limit: '12kb', strict: true }));
+  const readSite = async () => repository.getSiteSettings ? repository.getSiteSettings() : { settings: copyDefaults(), revision: 0 };
   const limiter = (limit, windowMs = 15 * 60 * 1000, extra = {}) => rateLimit({
     windowMs, limit, standardHeaders: 'draft-8', legacyHeaders: false,
     message: { error: 'Too many requests. Please try again later.' }, ...extra,
@@ -96,6 +100,7 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
   });
   app.post('/api/register', registrationLimit, async (req, res) => {
     const body = v.object(req.body);
+    if (!(await readSite()).settings.features.registration) throw new HttpError(403, 'Registration is disabled.');
     const username = v.username(body.username);
     const email = v.email(body.email);
     const password = v.password(body.password, true);
@@ -110,13 +115,14 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
     const password = v.password(body.password);
     const user = await repository.userByUsername(username);
     const valid = await bcrypt.compare(password, user?.password || dummyHash);
-    if (!user || !valid) throw new HttpError(401, 'Invalid username or password.');
+    if (!user || !valid || user.status === 'blocked') throw new HttpError(401, 'Invalid username or password.');
     const old = readCookie(req);
     if (old) await repository.revokeSession(hash(old));
     const token = randomToken();
     await repository.createSession({ hash: hash(token), userId: user.id, expiresAt: now() + config.sessionMs });
     res.cookie(config.cookieName, token, { ...cookieOptions, maxAge: config.sessionMs });
-    res.json({ user: { id: user.id, username: user.username, email: user.email }, csrfToken: csrfFor(token) });
+    const { password: _password, ...publicUser } = user;
+    res.json({ user: publicUser, csrfToken: csrfFor(token) });
   });
   app.get('/api/users/me', authenticate, (req, res) => {
     res.json({ user: req.auth.user, csrfToken: csrfFor(req.auth.token) });
@@ -127,12 +133,67 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
     res.clearCookie(config.cookieName, cookieOptions);
     res.status(204).end();
   });
+  function requireCSRF(req, _res, next) {
+    if (!equalHash(req.get('X-CSRF-Token'), csrfFor(req.auth.token))) throw new HttpError(403, 'Invalid request token. Reload the page and try again.');
+    next();
+  }
+  function requireAdmin(req, _res, next) {
+    if (req.auth.user.role !== 'admin') throw new HttpError(403, 'Administrator access is required.');
+    next();
+  }
+  const accountLimit = limiter(15);
+  const adminLimit = limiter(30, 60000);
+  app.get('/api/site', async (_req,res) => {
+    res.json({ ...await readSite(), capabilities: { emailVerification: mailer.ready } });
+  });
+  app.post('/api/users/me', authenticate, requireCSRF, accountLimit, async (req,res) => {
+    const body = v.object(req.body), account = await repository.userById(req.auth.user.id);
+    const currentPassword = v.password(body.currentPassword);
+    if (!account || !await bcrypt.compare(currentPassword, account.password)) throw new HttpError(403, 'Current password is incorrect.');
+    const username = v.username(body.username), email = v.email(body.email);
+    const displayName = v.string(body.displayName ?? '', 'Display name', 0, 80).trim();
+    const bio = v.string(body.bio ?? '', 'Bio', 0, 500).trim();
+    const newPasswordHash = body.newPassword ? await bcrypt.hash(v.password(body.newPassword, true),12) : null;
+    const proofHash = email !== account.email ? hash(v.token(body.verificationToken, 'Email verification')) : null;
+    await repository.updateProfile({ id: account.id, username, email, displayName, bio, expectedPasswordHash: account.password, newPasswordHash, proofHash, now: now() });
+    if (newPasswordHash) { res.clearCookie(config.cookieName,cookieOptions); return res.json({ reauthenticate:true }); }
+    res.json({ user: await repository.session(hash(req.auth.token), now()), csrfToken: csrfFor(req.auth.token) });
+  });
+  app.use('/api/admin', authenticate, requireAdmin, adminLimit);
+  app.get('/api/admin/users', async (req,res) => {
+    const search = typeof req.query.search === 'string' ? v.string(req.query.search, 'Search',0,80) : '';
+    const page = Number(req.query.page || 1);
+    if (!Number.isInteger(page) || page < 1 || page > 10000) throw new HttpError(400,'Invalid page number.');
+    res.json(await repository.adminUsers(search,page));
+  });
+  app.post('/api/admin/users/:id', requireCSRF, async (req,res) => {
+    const body=v.object(req.body), id=Number(req.params.id);
+    if (!Number.isSafeInteger(id)||id<1||!['block','unblock','delete'].includes(body.action)) throw new HttpError(400,'Invalid account action.');
+    if (body.action==='delete') {
+      const actor=await repository.userById(req.auth.user.id), target=await repository.userById(id);
+      if (!target) throw new HttpError(404,'Account not found.');
+      if (body.confirmUsername!==target.username) throw new HttpError(400,'Type the account username to confirm deletion.');
+      if (!actor || !await bcrypt.compare(v.password(body.currentPassword),actor.password)) throw new HttpError(403,'Current password is incorrect.');
+    }
+    await repository.moderateUser(req.auth.user.id,id,body.action);
+    res.json({ message:'Account updated.' });
+  });
+  app.get('/api/admin/settings', async (_req,res) => res.json(await readSite()));
+  app.post('/api/admin/settings', requireCSRF, async (req,res) => {
+    const body=v.object(req.body);
+    if (!Number.isInteger(body.revision)||body.revision<0) throw new HttpError(400,'Invalid settings revision.');
+    res.json(await repository.saveSiteSettings(validateSettings(body.settings),body.revision,req.auth.user.id));
+  });
+  app.get('/api/admin/audit', async (_req,res) => res.json({ events:await repository.auditLog() }));
   let activeQR = 0;
   async function qr(req, res) {
     if (activeQR >= 2) throw new HttpError(503, 'QR generator is busy. Please try again.');
     activeQR += 1;
     try {
-      const buffer = await generate(v.object(req.body));
+      const body = v.object(req.body), { features } = (await readSite()).settings;
+      if ((body.logo && !features.logos) || ((body.dotGradient || body.bgGradient) && !features.gradients) ||
+          (body.transparent && !features.transparency) || (body.kind === 'location' && !features.location)) throw new HttpError(403, 'This feature is disabled by the administrator.');
+      const buffer = await generate(body);
       res.type('png').set('Content-Disposition', 'inline; filename="qr-code.png"').send(buffer);
     } finally { activeQR -= 1; }
   }

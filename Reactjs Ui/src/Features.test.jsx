@@ -1,0 +1,83 @@
+import React from 'react';
+import {test,expect,vi} from 'vitest';
+import {render,screen,waitFor,fireEvent} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import App from './App';
+import Generator from './Generator';
+import {defaultSettings} from './site-defaults';
+vi.mock('./LocationMap',()=>({default:()=> <div>Location map</div>}));
+const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
+function mock(user=null){
+  vi.stubGlobal('fetch',vi.fn(async(url,options={})=>{
+    if(url==='/api/site')return json({settings:structuredClone(defaultSettings),revision:0,capabilities:{emailVerification:true}});
+    if(url==='/api/users/me'&&options.method!=='POST')return user?json({user,csrfToken:'csrf-local-test'}):json({error:'Please sign in.'},401);
+    if(url==='/api/users/me'&&options.method==='POST')return json({user:{...user,...JSON.parse(options.body)},csrfToken:'csrf-local-test'});
+    if(url.startsWith('/api/admin/users'))return json({users:[],total:0,page:1,stats:{total:1,blocked:0,admins:1}});
+    if(url==='/api/admin/settings')return options.method==='POST'?json({settings:JSON.parse(options.body).settings,revision:1}):json({settings:structuredClone(defaultSettings),revision:0});
+    throw new Error('Unexpected request '+url);
+  }));
+}
+test('settings switch language/RTL, theme and background without a standalone register nav item',async()=>{
+  const user=userEvent.setup();mock();render(<App/>);
+  expect(document.querySelector('header').textContent).not.toContain('Register');
+  expect(document.querySelector('footer').textContent).toContain('About');
+  await user.click(screen.getByRole('button',{name:'Dark mode',exact:true}));
+  expect(document.querySelector('.app-shell').dataset.theme).toBe('dark');
+  await user.click(screen.getByText('Menu',{exact:true}));
+  await user.click(screen.getByRole('link',{name:'Settings',exact:true}));
+  fireEvent.change(screen.getByLabelText('Page background'),{target:{value:'#112233'}});
+  expect(document.querySelector('.app-shell').style.getPropertyValue('--page-background')).toBe('#112233');
+  await user.selectOptions(screen.getByLabelText('Language'),'ar');
+  await waitFor(()=>expect(document.documentElement.dir).toBe('rtl'));
+  expect(screen.getByRole('heading',{name:'الإعدادات'})).toBeTruthy();
+  expect(JSON.parse(localStorage.getItem('qr.preferences.v1'))).toMatchObject({language:'ar',mode:'dark',backgrounds:{dark:'#112233'}});
+});
+test('QR options send pattern, gradient, transparency and inline logo through one request',async()=>{
+  const user=userEvent.setup();
+  vi.stubGlobal('fetch',vi.fn(async()=>new Response(new Blob(['png'],{type:'image/png'}),{headers:{'content-type':'image/png'}})));
+  render(<Generator/>);
+  await user.type(screen.getByLabelText('Website link'),'https://example.com');
+  await user.click(screen.getByRole('button',{name:'Dots',exact:true}));
+  await user.click(screen.getByLabelText('Two-color dots'));
+  await user.click(screen.getByLabelText('Transparent background'));
+  const file=new File([Uint8Array.from([137,80,78,71,13,10,26,10])],'logo.png',{type:'image/png'});
+  await user.upload(screen.getByLabelText('Upload logo'),file);
+  await screen.findByAltText('Logo or icon');
+  await user.click(screen.getByRole('button',{name:'Generate QR code',exact:true}));
+  await screen.findByRole('link',{name:'Download PNG'});
+  const body=JSON.parse(fetch.mock.calls[0][1].body);
+  expect(body).toMatchObject({dotShape:'dots',dotGradient:true,transparent:true,kind:'url'});
+  expect(body.logo).toMatch(/^data:image\/png;base64,/);
+});
+test('administrator can reorder sections and publish the live editor with CSRF and revision',async()=>{
+  const user=userEvent.setup();window.history.replaceState(null,'','/admin');
+  mock({id:1,username:'mhg admin',displayName:'MHG Admin',role:'admin'});
+  render(<App/>);
+  await screen.findByRole('button',{name:'Site editor',exact:true});
+  await user.click(screen.getByRole('button',{name:'Site editor',exact:true}));
+  const title=await screen.findByLabelText('Main title');
+  await user.clear(title);await user.type(title,'Edited site title');
+  expect(screen.getByRole('heading',{name:'Edited site title'})).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Layout',exact:true}));
+  await user.click(screen.getByRole('button',{name:'Move down Welcome',exact:true}));
+  await user.click(screen.getByRole('button',{name:'Publish changes',exact:true}));
+  await screen.findByText('Saved successfully.');
+  const call=fetch.mock.calls.find(([url,options])=>url==='/api/admin/settings'&&options.method==='POST');
+  expect(call[1].headers['X-CSRF-Token']).toBe('csrf-local-test');
+  const payload=JSON.parse(call[1].body);
+  expect(payload.revision).toBe(0);expect(payload.settings.sections[0].id).toBe('instructions');
+  expect(payload.settings.content.en.title).toBe('Edited site title');
+});
+test('profile saves display fields with current password and cannot send an admin role',async()=>{
+  const user=userEvent.setup();window.history.replaceState(null,'','/profile');
+  mock({id:2,username:'person',email:'person@example.com',displayName:'Person',role:'user'});
+  render(<App/>);
+  const name=await screen.findByLabelText('Display name');
+  await user.clear(name);await user.type(name,'My new name');
+  await user.type(screen.getByLabelText('Current password'),'test-only strong password');
+  await user.click(screen.getByRole('button',{name:'Save profile'}));
+  await screen.findByText('Saved successfully.');
+  const call=fetch.mock.calls.find(([url,options])=>url==='/api/users/me'&&options.method==='POST');
+  const payload=JSON.parse(call[1].body);
+  expect(payload.displayName).toBe('My new name');expect(payload.role).toBeUndefined();
+});

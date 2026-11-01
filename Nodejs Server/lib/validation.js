@@ -16,7 +16,7 @@ function email(value) {
 }
 function username(value) {
   const result = string(value, 'Username', 3, 32).trim().toLowerCase();
-  if (!/^[a-z0-9_]{3,32}$/.test(result)) throw new HttpError(400, 'Username must contain 3–32 letters, numbers or underscores.');
+  if (! /^(?=.{3,32}$)[a-z0-9_]+(?: [a-z0-9_]+)*$/.test(result)) throw new HttpError(400, 'Username must contain 3–32 letters, numbers, spaces or underscores.');
   return result;
 }
 function password(value, creating = false) {

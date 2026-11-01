@@ -18,9 +18,10 @@ test('login updates navigation, uses HttpOnly session responses and logout sends
   await user.type(screen.getByLabelText('Username', { exact: true }), 'person');
   await user.type(screen.getByLabelText('Password', { exact: true }), 'long secret password');
   await user.click(screen.getByRole('button', { name: 'Sign in', exact: true }));
-  await screen.findByText('Hi, person');
+  await screen.findByText('Welcome, person');
   expect(window.location.pathname).toBe('/');
   expect(localStorage.getItem('token')).toBeNull();
+  await user.click(screen.getByText('Menu',{exact:true}));
   await user.click(screen.getByRole('button', { name: 'Sign out', exact: true }));
   await screen.findByRole('heading', { name: 'Welcome back' });
   const call = fetch.mock.calls.find(([url]) => url === '/api/logout');
@@ -73,8 +74,8 @@ test('a delayed account lookup cannot overwrite a newer login', async () => {
   await user.type(screen.getByLabelText('Username', { exact: true }), 'newperson');
   await user.type(screen.getByLabelText('Password', { exact: true }), 'long secret password');
   await user.click(screen.getByRole('button', { name: 'Sign in', exact: true }));
-  await screen.findByText('Hi, newperson');
+  await screen.findByText('Welcome, newperson');
   finishLookup(json({ user: { username: 'oldperson' }, csrfToken: 'old-csrf' }));
-  await waitFor(() => expect(screen.getByText('Hi, newperson')).toBeTruthy());
-  expect(screen.queryByText('Hi, oldperson')).toBeNull();
+  await waitFor(() => expect(screen.getByText('Welcome, newperson')).toBeTruthy());
+  expect(screen.queryByText('Welcome, oldperson')).toBeNull();
 });
