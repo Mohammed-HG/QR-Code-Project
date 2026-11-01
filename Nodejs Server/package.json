@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node QRCode_Server.js",
     "dev": "node --watch QRCode_Server.js",
-    "test": "node --test test/qr.test.js test/security.test.js test/features.test.js",
+    "test": "node --test test/qr.test.js test/security.test.js test/features.test.js test/styling.test.js",
     "migrate": "node scripts/migrate.js"
   },
   "dependencies": {

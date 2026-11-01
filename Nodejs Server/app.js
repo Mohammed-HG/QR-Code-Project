@@ -191,7 +191,7 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
     activeQR += 1;
     try {
       const body = v.object(req.body), { features } = (await readSite()).settings;
-      if ((body.logo && !features.logos) || ((body.dotGradient || body.bgGradient) && !features.gradients) ||
+      if (((body.logo || body.iconId) && !features.logos) || ((body.dotGradient || body.bgGradient) && !features.gradients) ||
           (body.transparent && !features.transparency) || (body.kind === 'location' && !features.location)) throw new HttpError(403, 'This feature is disabled by the administrator.');
       const buffer = await generate(body);
       res.type('png').set('Content-Disposition', 'inline; filename="qr-code.png"').send(buffer);

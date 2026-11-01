@@ -37,8 +37,9 @@ test('QR options send pattern, gradient, transparency and inline logo through on
   vi.stubGlobal('fetch',vi.fn(async()=>new Response(new Blob(['png'],{type:'image/png'}),{headers:{'content-type':'image/png'}})));
   render(<Generator/>);
   await user.type(screen.getByLabelText('Website link'),'https://example.com');
+  await user.click(screen.getByText('Square',{selector:'summary span',exact:true}));
   await user.click(screen.getByRole('button',{name:'Dots',exact:true}));
-  await user.click(screen.getByLabelText('Two-color dots'));
+  await user.click(screen.getByRole('button',{name:'Dot color mode'}));
   await user.click(screen.getByLabelText('Transparent background'));
   const file=new File([Uint8Array.from([137,80,78,71,13,10,26,10])],'logo.png',{type:'image/png'});
   await user.upload(screen.getByLabelText('Upload logo'),file);
@@ -59,13 +60,13 @@ test('administrator can reorder sections and publish the live editor with CSRF a
   await user.clear(title);await user.type(title,'Edited site title');
   expect(screen.getByRole('heading',{name:'Edited site title'})).toBeTruthy();
   await user.click(screen.getByRole('button',{name:'Layout',exact:true}));
-  await user.click(screen.getByRole('button',{name:'Move down Welcome',exact:true}));
+  await user.click(screen.getByRole('button',{name:'Move down Page introduction',exact:true}));
   await user.click(screen.getByRole('button',{name:'Publish changes',exact:true}));
   await screen.findByText('Saved successfully.');
   const call=fetch.mock.calls.find(([url,options])=>url==='/api/admin/settings'&&options.method==='POST');
   expect(call[1].headers['X-CSRF-Token']).toBe('csrf-local-test');
   const payload=JSON.parse(call[1].body);
-  expect(payload.revision).toBe(0);expect(payload.settings.sections[0].id).toBe('instructions');
+  expect(payload.revision).toBe(0);expect(payload.settings.sections.filter(s=>s.id!=='instructions')[0].id).toBe('generator');
   expect(payload.settings.content.en.title).toBe('Edited site title');
 });
 test('profile saves display fields with current password and cannot send an admin role',async()=>{
@@ -80,4 +81,62 @@ test('profile saves display fields with current password and cannot send an admi
   const call=fetch.mock.calls.find(([url,options])=>url==='/api/users/me'&&options.method==='POST');
   const payload=JSON.parse(call[1].body);
   expect(payload.displayName).toBe('My new name');expect(payload.role).toBeUndefined();
+});
+
+test('color buttons reveal only needed fields and transparency hides all background colors',async()=>{
+  const user=userEvent.setup();render(<Generator/>);
+  expect(screen.queryByLabelText('Second dot color')).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Dot color mode'}));
+  expect(screen.getByLabelText('Second dot color')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Dot color mode'}));
+  expect(screen.queryByLabelText('Second dot color')).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Background color mode'}));
+  expect(screen.getByLabelText('Second background color')).toBeTruthy();
+  await user.click(screen.getByRole('button',{name:'Transparent background'}));
+  expect(screen.queryByLabelText('Background color',{exact:true})).toBeNull();
+  expect(screen.queryByLabelText('Second background color')).toBeNull();
+  expect(screen.queryByRole('button',{name:'Background color mode'})).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Transparent background'}));
+  expect(screen.getByLabelText('Second background color')).toBeTruthy();
+});
+test('Wi-Fi shows only Wi-Fi icons and resets incompatible icon selection',async()=>{
+  const user=userEvent.setup();vi.stubGlobal('fetch',vi.fn(async()=>new Response(new Blob(['png'],{type:'image/png'}),{headers:{'content-type':'image/png'}})));
+  render(<Generator/>);
+  await user.click(screen.getByRole('button',{name:'Heart',exact:true}));
+  await user.click(screen.getByRole('button',{name:'Wi-Fi',exact:true}));
+  expect(screen.queryByRole('button',{name:'Heart',exact:true})).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Wi-Fi secure',exact:true}));
+  fireEvent.change(screen.getByLabelText('Icon color'),{target:{value:'#ad2861'}});
+  await user.type(screen.getByLabelText('Network name (SSID)'),'Guest');
+  await user.selectOptions(screen.getByLabelText('Security type'),'nopass');
+  await user.type(screen.getByLabelText('Text below QR (optional)'),'Guest Wi-Fi');
+  await user.click(screen.getByRole('button',{name:'Generate QR code',exact:true}));
+  await screen.findByRole('link',{name:'Download PNG'});
+  const payload=JSON.parse(fetch.mock.calls[0][1].body);
+  expect(payload).toMatchObject({kind:'wifi',iconId:'wifi-shield',iconColor:'#ad2861',caption:'Guest Wi-Fi',logo:''});
+});
+test('welcome appears automatically and remember choice suppresses it on the next visit',async()=>{
+  document.cookie='qr_intro_hidden=; Max-Age=0; Path=/';
+  const user=userEvent.setup();mock();
+  const view=render(<App/>);
+  const dialog=await screen.findByRole('dialog');
+  expect(dialog.textContent).toContain('Welcome to QR Code Project');
+  expect(dialog.textContent).toContain('Choose the information you want to share.');
+  await user.click(screen.getByLabelText("Don't show this again"));
+  await user.click(screen.getByRole('button',{name:"Let's start",exact:true}));
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(document.cookie).toContain('qr_intro_hidden=1');
+  view.unmount();render(<App/>);
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(document.querySelector('.guide')).toBeNull();
+});
+test('signed-in name is outside the menu and About links to the owner GitHub profile',async()=>{
+  mock({id:1,username:'mhg admin',displayName:'MHG Admin',role:'admin'});
+  const user=userEvent.setup();render(<App/>);
+  const greeting=await screen.findByRole('link',{name:'Welcome, MHG Admin'});
+  expect(greeting.closest('details')).toBeNull();
+  await user.click(screen.getByText('Menu',{exact:true}));
+  const about=document.querySelector('.nav-menu-panel a[href="/about"]');
+  expect(about).toBeTruthy();await user.click(about);
+  expect(screen.getByRole('link',{name:'Mohammed-HG ↗'}).getAttribute('href')).toBe('https://github.com/Mohammed-HG');
 });

@@ -57,3 +57,17 @@ The editor accepts validated text and bounded style settings. It does not execut
 Startup adds profile/role/status columns to users, creates site_settings and admin_audit, and seeds bilingual defaults only when no settings exist. Existing account passwords and data are not reset. Back up the database before upgrading.
 
 Run npm test in both application directories. Backend tests decode all six patterns with gradients and logos, check real transparency, reject malicious/oversized logos, and test administration, profile authentication, proof handling and session revocation. The MySQL integration suite exercises these transactions on the actual SQL implementation. Frontend tests cover preferences, RTL, styling payloads, profile edits and editor publish/reorder behavior.
+
+## Design controls and first-visit message
+
+The pattern picker is a dropdown list with a shape swatch beside every option. Foreground and background begin with one color; Blend two colors reveals the second field and changes the action to Single color only. Transparent background is a button and hides the background color controls until Colored background is chosen.
+
+The trusted SVG library contains 30 general symbols and eight Wi-Fi variants. Symbols have an independent color selector. General symbols are available for link, text and location codes; Wi-Fi codes expose only Wi-Fi symbols. This service restriction is enforced by the backend. Uploaded raster logos remain supported. Arbitrary uploaded SVG is still rejected.
+
+An optional caption of up to 80 characters is exported below the QR inside the image background. Long captions wrap safely; Arabic and English are supported. The QR's quiet zone is preserved, and logos remain centered on the QR rather than the entire captioned image. PNG width is the selected QR size; captioned images have additional height. The Docker image includes DejaVu fonts for Arabic rendering.
+
+The welcome, capabilities and usage steps now appear in an automatic first-visit dialog rather than an inline instruction section or menu option. Don't show this again stores only the boolean preference in qr_intro_hidden for one year with Path=/ and SameSite=Lax (Secure over HTTPS). Without that choice, the dialog appears again on the next full visit. This is a browser preference and does not modify authentication cookies. Text remains editable in the administrator's content editor; the instructional block is not listed as a movable page section.
+
+The signed-in greeting links to Profile directly in the header. About appears in both the header menu and footer and links to https://github.com/Mohammed-HG.
+
+Google Maps was intentionally not substituted: its production interactive API requires a key and billing configuration. The existing Leaflet/OpenStreetMap map remains available without adding these requirements.

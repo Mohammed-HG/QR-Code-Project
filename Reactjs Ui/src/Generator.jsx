@@ -4,7 +4,7 @@ import LocationMap from './LocationMap';
 import QRDesign from './QRDesign';
 import { usePreferences } from './preferences';
 const services = [['url', 'Link'], ['text', 'Text'], ['wifi', 'Wi-Fi'], ['location', 'Location']];
-const initial = { text: '', ssid: '', password: '', encryption: 'WPA', latitude: '25.383', longitude: '49.586', dotColor: '#000000', bgColor: '#ffffff', size: 480, dotColor2: '#5929a3', bgColor2:'#eaf0ff', dotGradient:false,bgGradient:false,transparent:false,dotShape:'square',gradientAngle:'45',logo:'' };
+const initial = { text: '', ssid: '', password: '', encryption: 'WPA', latitude: '25.383', longitude: '49.586', dotColor: '#000000', bgColor: '#ffffff', size: 480, dotColor2: '#5929a3', bgColor2:'#eaf0ff', dotGradient:false,bgGradient:false,transparent:false,dotShape:'square',gradientAngle:'45',logo:'', iconId:'', iconColor:'#000000', caption:'' };
 export default function Generator({features: featureSettings, preview=false}) {
   const {t}=usePreferences();
   const features={logos:true,gradients:true,transparency:true,location:true,...featureSettings};
@@ -30,7 +30,7 @@ export default function Generator({features: featureSettings, preview=false}) {
     setBusy(false); setBlob(null); setError('');
   }
   function update(patch) { invalidate(); setValues(old => ({ ...old, ...patch })); }
-  function changeKind(next) { invalidate(); setKind(next); }
+  function changeKind(next) { invalidate(); if ((next==='wifi')!==(kind==='wifi')) setValues(old=>({...old,iconId:''})); setKind(next); }
   async function generate(event) {
     event.preventDefault();
     controller.current?.abort();
@@ -38,7 +38,7 @@ export default function Generator({features: featureSettings, preview=false}) {
     controller.current = requestController;
     const id = ++current.current;
     setBusy(true); setError(''); setBlob(null);
-    const payload = { kind, dotColor: values.dotColor, bgColor: values.bgColor, size: Number(values.size), dotColor2:values.dotColor2,bgColor2:values.bgColor2,dotGradient:features.gradients&&values.dotGradient,bgGradient:features.gradients&&values.bgGradient,transparent:features.transparency&&values.transparent,dotShape:values.dotShape,gradientAngle:Number(values.gradientAngle),logo:features.logos?values.logo:'',
+    const payload = { kind, dotColor: values.dotColor, bgColor: values.bgColor, size: Number(values.size), dotColor2:values.dotColor2,bgColor2:values.bgColor2,dotGradient:features.gradients&&values.dotGradient,bgGradient:features.gradients&&values.bgGradient,transparent:features.transparency&&values.transparent,dotShape:values.dotShape,gradientAngle:Number(values.gradientAngle),logo:features.logos?values.logo:'', iconId:features.logos?values.iconId:'', iconColor:values.iconColor, caption:values.caption,
       ...(kind === 'wifi' ? { ssid: values.ssid, password: values.encryption === 'nopass' ? '' : values.password, encryption: values.encryption } :
         kind === 'location' ? { latitude: Number(values.latitude), longitude: Number(values.longitude) } : { text: values.text }) };
     try {
@@ -81,7 +81,7 @@ export default function Generator({features: featureSettings, preview=false}) {
           <LocationMap latitude={Number(values.latitude)} longitude={Number(values.longitude)} onChange={update} />
           <p className="hint">{t("Enter coordinates or select a point on the map. The map uses OpenStreetMap.")}</p>
         </>}
-        <QRDesign values={values} update={update} features={features} />
+        <QRDesign values={values} update={update} features={features} kind={kind} />
         {error && <p role="alert" className="alert error">{error}</p>}
         <button className="button primary" type="submit" disabled={preview || busy || !complete}>{t(busy ? 'Generating…' : 'Generate QR code')}</button>
       </form>

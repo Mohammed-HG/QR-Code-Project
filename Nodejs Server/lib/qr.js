@@ -41,6 +41,7 @@ function luminance(hex) {
 const sharp = require('sharp');
 sharp.cache({ memory: 16, files: 0, items: 20 });
 sharp.concurrency(1);
+const iconCatalog = require('./icons.json');
 const shapes = ['square', 'dots', 'rounded', 'diamond', 'soft', 'vertical'];
 function qrOptions(body) {
   const dark = body.dotColor ?? '#000000', light = body.bgColor ?? '#ffffff';
@@ -62,7 +63,7 @@ function qrOptions(body) {
   if (!shapes.includes(shape)) throw new HttpError(400, 'Invalid QR pattern.');
   const angle = body.gradientAngle ?? 45;
   if (![0,45,90,135].includes(angle)) throw new HttpError(400, 'Invalid gradient direction.');
-  return { width, margin: 4, errorCorrectionLevel: body.logo ? 'H' : 'M', color: { dark, light }, dark2, light2, shape, angle, transparent: Boolean(body.transparent) };
+  return { width, margin: 4, errorCorrectionLevel: body.logo || body.iconId ? 'H' : 'M', color: { dark, light }, dark2, light2, shape, angle, transparent: Boolean(body.transparent) };
 }
 async function readLogo(input) {
   if (!input) return null;
@@ -81,7 +82,18 @@ async function readLogo(input) {
 async function render(body) {
   v.object(body);
   const text = payloadFor(body), options = qrOptions(body);
-  const logo = await readLogo(body.logo);
+  const caption = v.string(body.caption ?? '', 'Caption', 0, 80).trim();
+  if (/[\u0000-\u001f\u007f]/.test(caption)) throw new HttpError(400, 'Caption must be a single line of text.');
+  if (body.logo && body.iconId) throw new HttpError(400, 'Choose a library icon or an uploaded logo, not both.');
+  let logo = await readLogo(body.logo);
+  if (body.iconId) {
+    const icon = iconCatalog.find(item => item.id === body.iconId);
+    if (!icon || (icon.category === 'Wi-Fi') !== (body.kind === 'wifi')) throw new HttpError(400, 'This icon is not available for this QR service.');
+    const color = body.iconColor ?? '#000000';
+    if (typeof color !== 'string' || !/^#[a-f0-9]{6}$/i.test(color)) throw new HttpError(400, 'Invalid icon color.');
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24"><rect width="24" height="24" fill="' + (luminance(color) > .179 ? '#000000' : '#ffffff') + '"/><path d="' + icon.d + '" fill="none" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    logo = await sharp(Buffer.from(svg)).png().toBuffer();
+  }
   let matrix;
   try { matrix = QRCode.create(text, options).modules; }
   catch { throw new HttpError(400, 'Shorten the content to fit this QR code.'); }
@@ -111,6 +123,29 @@ async function render(body) {
     const mark = await sharp(logo).resize(logoSize,logoSize,{ fit:'contain',background:'#ffffff' }).extend({ top:padding,bottom:padding,left:padding,right:padding,background:'#ffffff' }).png().toBuffer();
     image = image.composite([{ input:mark, gravity:'centre' }]);
   }
-  return image.png().toBuffer();
+  const qrImage = await image.png().toBuffer();
+  if (!caption) return qrImage;
+  const width = options.width, fontSize = Math.max(12, Math.min(24, Math.round(width * .036)));
+  const padding = Math.max(12, Math.round(width * .025)), lineHeight = Math.round(fontSize * 1.55);
+  const limit = Math.max(8, Math.floor((width - padding * 2) / (fontSize * 1.05)));
+  const segmenter = new Intl.Segmenter(undefined, { granularity:'grapheme' });
+  const parts = text => [...segmenter.segment(text)].map(part => part.segment);
+  const lines = [];
+  let line = '';
+  for (const word of caption.split(/\s+/)) {
+    const characters = parts(word);
+    if (line && parts(line).length + characters.length + 1 > limit) { lines.push(line); line = ''; }
+    while (characters.length > limit) { lines.push(characters.splice(0, limit).join('')); }
+    if (characters.length) line += (line ? ' ' : '') + characters.join('');
+  }
+  if (line) lines.push(line);
+  const height = width + padding * 2 + lineHeight * lines.length;
+  const escape = text => text.replace(/[&<>"']/g, value => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[value]));
+  const coordinates = directions[options.angle].map(value => parseInt(value,10) * width / 100);
+  const background = options.transparent ? '' : '<defs><linearGradient id="caption-bg" gradientUnits="userSpaceOnUse" x1="'+coordinates[0]+'" y1="'+coordinates[1]+'" x2="'+coordinates[2]+'" y2="'+coordinates[3]+'"><stop stop-color="'+options.color.light+'"/><stop offset="1" stop-color="'+options.light2+'"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#caption-bg)"/>';
+  const direction = /[\u0590-\u08ff]/.test(caption) ? 'rtl' : 'ltr';
+  const lettering = lines.map((text,i) => '<text x="'+width/2+'" y="'+(width+padding+fontSize+i*lineHeight)+'" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="'+fontSize+'" direction="'+direction+'" unicode-bidi="plaintext" fill="'+options.color.dark+'">'+escape(text)+'</text>').join('');
+  const canvas = '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'">'+background+lettering+'</svg>';
+  return sharp(Buffer.from(canvas), { limitInputPixels:2000000 }).composite([{input:qrImage,top:0,left:0}]).png().toBuffer();
 }
 module.exports = { render, payloadFor, qrOptions, escapeWifi, shapes, readLogo };
