@@ -203,3 +203,8 @@ th { color:var(--muted); font-size:.78rem; font-weight:700; }
 @media (max-width:380px) { .stats-grid { gap:.4rem; } .stat { padding:.8rem; } .stat span { font-size:.7rem; } .stat strong { font-size:1.5rem; } .benefit-grid { grid-template-columns:minmax(0,1fr); } .nav-menu summary>span { display:none; } }
 
 .page-intro .eyebrow { color:color-mix(in srgb,var(--accent) 65%,var(--page-ink)); }
+
+.upload-native { position:absolute; width:1px !important; height:1px !important; padding:0 !important; overflow:hidden; clip-path:inset(50%); }
+.file-picker { display:flex; align-items:center; gap:.75rem; min-width:0; padding:.65rem; border:1px solid var(--line); border-radius:9px; }
+.file-picker span { font-size:.78rem; color:var(--muted); overflow-wrap:anywhere; min-width:0; }
+.file-picker button { flex-shrink:0; }

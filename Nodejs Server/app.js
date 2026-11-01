@@ -35,7 +35,7 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
     next();
   });
   app.use('/qr', express.json({ limit: '400kb', strict: true }));
-  app.use('/api/admin/settings', express.json({ limit: '32kb', strict: true }));
+  app.use('/api/admin/settings', express.json({ limit: '64kb', strict: true }));
   app.use(express.json({ limit: '12kb', strict: true }));
   const readSite = async () => repository.getSiteSettings ? repository.getSiteSettings() : { settings: copyDefaults(), revision: 0 };
   const limiter = (limit, windowMs = 15 * 60 * 1000, extra = {}) => rateLimit({
@@ -44,7 +44,7 @@ function createApp({ repository, mailer, config, now = Date.now, generate = rend
   });
   const loginIp = limiter(30);
   const loginIdentity = limiter(10, 15 * 60 * 1000, {
-    keyGenerator: req => hash(String(req.body?.username || '').toLowerCase()),
+    keyGenerator: req => hash(String(req.body?.username || '').trim().toLowerCase()),
   });
   const otpLimit = limiter(5);
   const verifyLimit = limiter(30);

@@ -150,3 +150,9 @@ test('SQL repository commits failed OTP attempt counters instead of rolling them
   }
   assert.equal(attempts, 5); assert.equal(commits, 6); assert.equal(rollbacks, 0);
 });
+
+test('login identity limits normalize spaces and case',async()=>{
+  const f=fixture();
+  for(let i=0;i<10;i++)await request(f.app).post('/api/login').send({username:i%2?' Person ':'PERSON',password:'wrong password'}).expect(401);
+  await request(f.app).post('/api/login').send({username:' person ',password:'wrong password'}).expect(429);
+});
