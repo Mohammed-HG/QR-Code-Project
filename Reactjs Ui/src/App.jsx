@@ -12,7 +12,7 @@ const Sun=()=> <svg viewBox="0 0 24 24" width="21" height="21" fill="none" strok
 function AccountPage() {
   const {path}=useNavigation(),{t}=usePreferences(),{settings,capabilities}=useSite();
   const registering=path==='/register';
-  return <><nav className="account-tabs" aria-label={t('Account')}><Link role="tab" aria-selected={!registering} href="/login">{t('Sign in')}</Link><Link role="tab" aria-selected={registering} href="/register">{t('Register')}</Link></nav>{registering?settings.features.registration?<><RegisterPage/>{!capabilities.emailVerification&&<p className="hint centered">{t('Registration needs configured SMTP to send real verification emails.')}</p>}</>:<section className="panel auth-layout">{t('Registration is disabled.')}</section>:<LoginPage/>}</>;
+  return <><nav className="account-tabs" aria-label={t('Account')}><Link aria-current={!registering?'page':undefined} href="/login">{t('Sign in')}</Link><Link aria-current={registering?'page':undefined} href="/register">{t('Register')}</Link></nav>{registering?settings.features.registration?<><RegisterPage/>{!capabilities.emailVerification&&<p className="hint centered">{t('Registration needs configured SMTP to send real verification emails.')}</p>}</>:<section className="panel auth-layout">{t('Registration is disabled.')}</section>:<LoginPage/>}</>;
 }
 function SettingsPage() {
   const prefs=usePreferences(),{settings}=useSite(),{t}=prefs,mode=prefs.mode||settings.appearance.defaultTheme;
