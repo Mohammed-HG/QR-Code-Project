@@ -1,22 +1,29 @@
 {
+  "name": "qr-code-server",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24.15.0"
+  },
   "scripts": {
     "start": "node QRCode_Server.js",
-    "dev": "nodemon QRCode_Server.js"
+    "dev": "node --watch QRCode_Server.js",
+    "test": "node --test test/qr.test.js test/security.test.js",
+    "migrate": "node scripts/migrate.js"
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^5.1.0",
-    "express-session": "^1.17.3",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.2",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.14.1",
-    "qrcode": "^1.5.4",
-    "tesseract.js": "^6.0.0"
+    "bcrypt": "6.0.0",
+    "dotenv": "17.3.1",
+    "express": "5.3.0",
+    "express-rate-limit": "8.7.2",
+    "helmet": "8.3.0",
+    "mysql2": "3.24.6",
+    "nodemailer": "10.3.1",
+    "qrcode": "1.5.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "jsqr": "1.4.0",
+    "pngjs": "7.0.0",
+    "supertest": "7.3.1"
   }
 }
