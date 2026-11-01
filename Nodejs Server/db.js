@@ -1,28 +1,15 @@
-const mysql = require('mysql2');
-
-require('dotenv').config({ path: './QR-Code-Project/Nodejs Server/.env'});
-
-// DataBase Connection
-const db = mysql.createConnection({
-
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-  }) ;
-
-  if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_PASSWORD || !process.env.DB_NAME) {
-    console.error('Missing required environment variables');
-    process.exit(1); 
-};
-
-db.connect ((err) => {
-    if (err) { 
-        console.error('Error connecting to the database:', err);
-    }
-    else {
-        console.log('Connected to the database!');
-    }
-});
-
-module.exports = db;
+const mysql = require('mysql2/promise');
+function createPool(env = process.env) {
+  for (const key of ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME']) {
+    if (!env[key]) throw new Error(key + ' must be configured.');
+  }
+  if (env.DB_USER === 'root') throw new Error('Use a dedicated database user, not root.');
+  return mysql.createPool({
+    host: env.DB_HOST, port: Number(env.DB_PORT || 3306), user: env.DB_USER,
+    password: env.DB_PASSWORD, database: env.DB_NAME,
+    waitForConnections: true, connectionLimit: 10, queueLimit: 50,
+    connectTimeout: 10000, timezone: 'Z', dateStrings: false,
+    ...(env.DB_SSL_CA ? { ssl: { ca: env.DB_SSL_CA, rejectUnauthorized: true } } : {}),
+  });
+}
+module.exports = { createPool };

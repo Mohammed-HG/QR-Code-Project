@@ -1,34 +1,68 @@
-version: '3.8'
 services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Generate a new root password in .env}
+      MYSQL_DATABASE: qrcode_project
+      MYSQL_USER: qr_app
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Generate a new application password in .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [database]
   backend:
     build: ./Nodejs Server
-    ports:
-      - "3200:3200"
-    env_file:
-      - ./Nodejs Server/.env
-    networks:
-      - qrcode_net
-
-  frontend:
-    build: ./Reactjs Ui
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-    networks:
-      - qrcode_net
-
-  db:
-    image: mysql:8.0
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: 7253MHG7253mhg@!
-      MYSQL_DATABASE: qrcode_project
-    ports:
-      - "3306:3306"
-    networks:
-      - qrcode_net
-
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3200
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      AUTH_SECRET: ${AUTH_SECRET:?Generate a new authentication secret in .env}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: qr_app
+      DB_PASSWORD: ${DB_PASSWORD:?Generate a new application password in .env}
+      DB_NAME: qrcode_project
+      TRUST_PROXY_HOPS: 1
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3200/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [database, application]
+  frontend:
+    build:
+      context: ./Reactjs Ui
+      dockerfile: dockerfile
+    restart: unless-stopped
+    ports: ["127.0.0.1:${APP_PORT:-3000}:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [application]
+volumes:
+  mysql_data:
 networks:
-  qrcode_net:
-
+  database:
+    internal: true
+  application:
