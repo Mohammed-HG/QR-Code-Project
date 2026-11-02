@@ -3,8 +3,10 @@ services:
     name: qr-code-project-api
     runtime: docker
     plan: free
-    rootDir: Nodejs Server
-    dockerfilePath: ./Dockerfile
+    branch: main
+    autoDeployTrigger: commit
+    dockerContext: ./Nodejs Server
+    dockerfilePath: ./Nodejs Server/Dockerfile
     healthCheckPath: /readyz
     envVars:
       - key: NODE_ENV

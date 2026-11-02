@@ -22,6 +22,7 @@ Disable deploy previews and branch deploys for production authentication: they h
 ## 3. Render backend
 
 Create a new Blueprint from this repository and `render.yaml`. Verify the instance plan is Free.
+The Blueprint explicitly follows `main` and automatically deploys every commit.
 Set the prompted secrets in the Render dashboard:
 
 | Variable | Value |
@@ -42,6 +43,9 @@ Set build environment variable `QR_API_ORIGIN` to the backend's exact
 the SPA fallback. Frontend requests remain same-origin; do not replace them with cross-site fetches.
 The build fails if the backend origin is missing or invalid. Only the backend URL is public;
 database and mail credentials belong exclusively in Render runtime secrets.
+Connect the new Netlify project to `Mohammed-HG/QR-Code-Project` using its GitHub
+integration, set the production branch to `main`, and keep continuous deployment enabled.
+A manual drag-and-drop deployment does not establish this Git connection.
 
 ## 5. Mail and administrator
 
