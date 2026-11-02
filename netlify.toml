@@ -2,6 +2,8 @@
   base = "Reactjs Ui"
   command = "npm run build && node ../scripts/netlify-routing.mjs"
   publish = "dist"
+  # Routing scripts and server changes live outside the frontend base directory.
+  ignore = "exit 1"
 
 [build.environment]
   NODE_VERSION = "24"
