@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: qr-code-project-api
+    runtime: docker
+    plan: free
+    rootDir: Nodejs Server
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /readyz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_SECRET
+        sync: false
+      - key: APP_ORIGIN
+        sync: false
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_SSL_CA
+        sync: false
