@@ -1,5 +1,14 @@
 # Netlify + Render + Aiven deployment
 
+## Current production endpoints
+
+- Website: https://mhg-qr-code-generator.netlify.app
+- API readiness: https://qr-code-project-api.onrender.com/readyz
+- Production branch: `main` in `Mohammed-HG/QR-Code-Project`.
+
+The website proxies API requests to Render. MySQL runs separately on Aiven Free.
+Registration requires a configured verification-mail sender; it stays disabled until then.
+
 Create separate projects/services. Do not import these settings into an existing portfolio or other application.
 No production service or cloud database is created by committing these files.
 
