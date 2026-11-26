@@ -17,7 +17,7 @@ function AccountPage() {
 }
 function SettingsPage() {
   const prefs=usePreferences(),{settings}=useSite(),{t}=prefs,mode=prefs.mode||settings.appearance.defaultTheme;
-  return <section className="panel settings-panel"><p className="eyebrow">QR CODE PROJECT</p><h1>{t('Settings')}</h1><div className="field"><label htmlFor="language">{t('Language')}</label><select id="language" value={prefs.language} onChange={e=>prefs.setLanguage(e.target.value)}><option value="en">English</option><option value="ar">العربية</option></select></div><h2>{t('Appearance')}</h2><p className="hint">{t(mode==='dark'?'Dark mode':'Light mode')}</p><div className="field"><label htmlFor="page-background">{t('Page background')}</label><input id="page-background" type="color" value={prefs.backgrounds[mode]||settings.appearance[mode==='dark'?'darkBackground':'lightBackground']} onChange={e=>prefs.setBackground(mode,e.target.value)}/></div><button className="text-button" type="button" onClick={()=>prefs.setBackground(mode,null)}>{t('Use site default')}</button></section>;
+  return <section className="panel settings-panel"><p className="eyebrow">MHG QR CODE GENERATOR</p><h1>{t('Settings')}</h1><div className="field"><label htmlFor="language">{t('Language')}</label><select id="language" value={prefs.language} onChange={e=>prefs.setLanguage(e.target.value)}><option value="en">English</option><option value="ar">العربية</option></select></div><h2>{t('Appearance')}</h2><p className="hint">{t(mode==='dark'?'Dark mode':'Light mode')}</p><div className="field"><label htmlFor="page-background">{t('Page background')}</label><input id="page-background" type="color" value={prefs.backgrounds[mode]||settings.appearance[mode==='dark'?'darkBackground':'lightBackground']} onChange={e=>prefs.setBackground(mode,e.target.value)}/></div><button className="text-button" type="button" onClick={()=>prefs.setBackground(mode,null)}>{t('Use site default')}</button></section>;
 }
 function Site() {
   const {path,navigate}=useNavigation(),auth=useAuth(),prefs=usePreferences(),site=useSite(),{t,language}=prefs;
@@ -38,13 +38,13 @@ function Site() {
   else if(path==='/settings')page=<SettingsPage/>;
   else if(path==='/profile')page=<ProfilePage/>;
   else if(path==='/admin')page=<AdminPage/>;
-  else if(path==='/about')page=<section className="panel about-panel"><p className="eyebrow">QR CODE PROJECT</p><h1>{content.aboutTitle}</h1><p className="preserve-lines">{content.about}</p><p className="creator-link">{t('Created by')} <a href="https://github.com/Mohammed-HG" target="_blank" rel="noopener noreferrer">Mohammed-HG ↗</a></p><Link className="button primary" href="/">{t('Create a QR code')}</Link></section>;
+  else if(path==='/about')page=<section className="panel about-panel"><p className="eyebrow">MHG QR CODE GENERATOR</p><h1>{content.aboutTitle}</h1><p className="preserve-lines">{content.about.replaceAll('QR Code Project','MHG QR Code Generator')}</p><p className="creator-link">{t('Created by')} <a href="https://github.com/Mohammed-HG" target="_blank" rel="noopener noreferrer">Mohammed-HG ↗</a></p><Link className="button primary" href="/">{t('Create a QR code')}</Link></section>;
   else if(path==='/help')page=<section className="panel about-panel"><h1>{content.instructionsTitle}</h1><ol>{content.steps.map((step,i)=><li key={i}>{step}</li>)}</ol><h2>{content.benefitsTitle}</h2><ul>{content.benefits.map((item,i)=><li key={i}>{item}</li>)}</ul></section>;
   else page=<section className="panel about-panel"><h1>{t('Page not found')}</h1><p>{t('This page does not exist.')}</p><Link href="/">{t('Return to the generator')}</Link></section>;
   const style={'--page-background':background,'--page-ink':contrastInk(background),'--accent':a.accent,'--accent-ink':contrastInk(a.accent),'--site-width':a.maxWidth+'px','--section-gap':a.gap+'px','--radius':a.radius+'px','--heading-size':a.headingSize+'px','--panel-padding':a.panelPadding+'px'};
   return <div className="app-shell" data-theme={mode} style={style}>
     <a className="skip-link" href="#main-content">{t('Skip to content')}</a>
-    <header className="site-header"><div className="header-inner"><Link className="brand" href="/"><span className="brand-mark" aria-hidden="true">▦</span><span>QR Code Project</span></Link><nav aria-label={t('Menu')} className="header-actions">
+    <header className="site-header"><div className="header-inner"><Link className="brand" href="/"><span className="brand-mark" aria-hidden="true">▦</span><span>MHG QR Code Generator</span></Link><nav aria-label={t('Menu')} className="header-actions">
       {auth.user&&<Link href="/profile" className="navbar-greeting">{t('Welcome')}{language==='ar'?'، ':', '}{auth.user.displayName||auth.user.username}</Link>}
       <button type="button" className="theme-toggle" aria-label={t(mode==='light'?'Dark mode':'Light mode')} title={t(mode==='light'?'Dark mode':'Light mode')} onClick={()=>prefs.setMode(mode==='light'?'dark':'light')}>{mode==='light'?<Moon/>:<Sun/>}</button>
       <details className="nav-menu" ref={menu}><summary aria-label={t('Menu')}><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>{t('Menu')}</span></summary><div className="nav-menu-panel">
@@ -54,7 +54,7 @@ function Site() {
     </nav></div></header>
     <main id="main-content" tabIndex="-1" className="main-content">{auth.error&&<p className="alert error" role="alert">{t(auth.error)}</p>}{page}</main>
     <Onboarding/>
-    <footer className="site-footer"><span>QR Code Project · {content.footer}</span><Link href="/about">{t('About')}</Link></footer>
+    <footer className="site-footer"><span>MHG QR Code Generator · {content.footer}</span><Link href="/about">{t('About')}</Link></footer>
   </div>;
 }
 export default function App(){return <PreferencesProvider><NavigationProvider><SiteProvider><AuthProvider><Site/></AuthProvider></SiteProvider></NavigationProvider></PreferencesProvider>;}

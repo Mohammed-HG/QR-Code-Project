@@ -41,3 +41,24 @@ test('rejects incompatible icon categories, arbitrary colors, and invalid captio
     {text:'a',logo:'data:image/png;base64,YWJjZA==',iconId:'heart'},
   ])await assert.rejects(render(body),error=>error.status===400);
 });
+
+test('dot gradients continue across the QR instead of repeating in every module', async () => {
+  for (const angle of [0,45,90,135]) {
+    const buffer=await render({kind:'url',text:'https://google.com/',size:480,dotGradient:true,dotColor:'#102040',dotColor2:'#601030',gradientAngle:angle});
+    const image=PNG.sync.read(buffer);
+    const matrix=require('qrcode').create('https://google.com/',{errorCorrectionLevel:'H'}).modules;
+    const units=matrix.size+8,step=Math.floor(480/units),offset=Math.floor((480-units*step)/2);
+    const pixel=(col,row,part)=>Array.from(image.data.subarray(((offset+(row+4)*step+part)*480+offset+(col+4)*step+part)*4,((offset+(row+4)*step+part)*480+offset+(col+4)*step+part)*4+3));
+    const start=pixel(0,0,1),end=pixel(0,0,step-2);
+    assert(start.every((channel,index)=>Math.abs(channel-end[index])<8),'a module should contain only a small portion of the full gradient');
+    const decoded=jsQR(new Uint8ClampedArray(image.data),image.width,image.height);
+    assert.equal(decoded?.data,'https://google.com/');
+  }
+});
+
+test('all pattern previews are real QR codes for google.com', () => {
+  for(const shape of ['square','dots','rounded','diamond','soft','vertical']) {
+    const image=PNG.sync.read(fs.readFileSync(path.join(__dirname,'../../Reactjs Ui/public/pattern-previews',shape+'.png')));
+    assert.equal(jsQR(new Uint8ClampedArray(image.data),image.width,image.height)?.data,'https://google.com/');
+  }
+});

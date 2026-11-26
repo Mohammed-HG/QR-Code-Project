@@ -18,7 +18,7 @@ export const defaultSettings = {
         "No generated codes stored on the server"
       ],
       "aboutTitle": "Small codes. Endless possibilities.",
-      "about": "QR Code Project helps you share links, text, network details and locations in a beautifully customized code. Generated images are returned directly to your browser. Test the final result on the background where you will use it.",
+      "about": "MHG QR Code Generator helps you share links, text, network details and locations in a beautifully customized code. Generated images are returned directly to your browser. Test the final result on the background where you will use it.",
       "footer": "Create. Customize. Share."
     },
     "ar": {
@@ -39,7 +39,7 @@ export const defaultSettings = {
         "لا تُحفظ الرموز المولّدة على الخادم"
       ],
       "aboutTitle": "رموز صغيرة، وإمكانات واسعة.",
-      "about": "يساعدك QR Code Project على مشاركة الروابط والنصوص وبيانات الشبكات والمواقع برمز يعكس ذوقك. تُرسل الصور المولّدة مباشرة إلى متصفحك. اختبر النتيجة على الخلفية التي ستستخدمها عليها.",
+      "about": "يساعدك MHG QR Code Generator على مشاركة الروابط والنصوص وبيانات الشبكات والمواقع برمز يعكس ذوقك. تُرسل الصور المولّدة مباشرة إلى متصفحك. اختبر النتيجة على الخلفية التي ستستخدمها عليها.",
       "footer": "أنشئ. خصّص. شارك."
     }
   },

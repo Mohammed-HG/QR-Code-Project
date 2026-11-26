@@ -37,7 +37,7 @@ test('QR options send pattern, gradient, transparency and inline logo through on
   vi.stubGlobal('fetch',vi.fn(async()=>new Response(new Blob(['png'],{type:'image/png'}),{headers:{'content-type':'image/png'}})));
   render(<Generator/>);
   await user.type(screen.getByLabelText('Website link'),'https://example.com');
-  await user.click(screen.getByText('Square',{selector:'summary span',exact:true}));
+  await user.click(screen.getByText('Default',{selector:'summary span',exact:true}));
   await user.click(screen.getByRole('button',{name:'Dots',exact:true}));
   await user.click(screen.getByRole('button',{name:'Dot color mode'}));
   await user.click(screen.getByLabelText('Transparent background'));
@@ -120,7 +120,7 @@ test('welcome appears automatically and remember choice suppresses it on the nex
   const user=userEvent.setup();mock();
   const view=render(<App/>);
   const dialog=await screen.findByRole('dialog');
-  expect(dialog.textContent).toContain('Welcome to QR Code Project');
+  expect(dialog.textContent).toContain('Welcome to MHG QR Code Generator');
   expect(dialog.textContent).toContain('Choose the information you want to share.');
   await user.click(screen.getByLabelText("Don't show this again"));
   await user.click(screen.getByRole('button',{name:"Let's start",exact:true}));

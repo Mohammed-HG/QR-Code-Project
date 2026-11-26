@@ -128,13 +128,6 @@ input[type="checkbox"] { width:1.05rem; height:1.05rem; min-width:1.05rem; margi
 .pattern-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; }
 .pattern-options button { display:flex; flex-direction:column; align-items:center; gap:.45rem; padding:.75rem .3rem; color:var(--ink); border:1px solid var(--line); border-radius:10px; background:var(--surface); font-size:.8rem; }
 .pattern-options button[aria-pressed="true"] { border:2px solid var(--accent); padding:calc(.75rem - 1px) calc(.3rem - 1px); background:color-mix(in srgb,var(--accent) 10%,var(--surface)); }
-.pattern-swatch { display:grid; grid-template-columns:repeat(3,7px); gap:2px; height:25px; }
-.pattern-swatch i { width:7px; height:7px; background:currentColor; }
-.pattern-swatch.dots i { border-radius:50%; }
-.pattern-swatch.rounded i { border-radius:3px; }
-.pattern-swatch.soft i { border-radius:1.5px; }
-.pattern-swatch.diamond i { transform:scale(.75) rotate(45deg); }
-.pattern-swatch.vertical i { width:5px; border-radius:3px; }
 .field-label { font-weight:650; font-size:.9rem; }
 .check-row { display:flex; align-items:center; gap:.6rem; font-size:.88rem; margin:0 0 1.15rem; cursor:pointer; }
 .logo-editor { border-top:1px solid var(--line); padding-top:1.2rem; margin-top:1.25rem; }
@@ -253,3 +246,7 @@ th { color:var(--muted); font-size:.78rem; font-weight:700; }
 .onboarding-benefits { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem 1.4rem; padding-inline-start:1.2rem; font-size:.82rem; color:var(--muted); margin-bottom:1.5rem; }
 .onboarding-dialog>.button { width:100%; }
 @media(max-width:450px){.onboarding-dialog { padding:1.1rem; } .onboarding-benefits { grid-template-columns:minmax(0,1fr); }}
+
+.pattern-preview { width:64px; height:64px; flex:none; object-fit:contain; background:white; border-radius:4px; image-rendering:pixelated; }
+
+.pattern-preview { width:64px; height:64px; flex:none; object-fit:contain; background:white; border-radius:4px; image-rendering:pixelated; }

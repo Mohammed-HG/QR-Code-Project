@@ -10,7 +10,7 @@ export default function Onboarding(){
   if(!visible)return null;
   return <dialog ref={dialog} className="onboarding-dialog" aria-labelledby="onboarding-title" onCancel={e=>{e.preventDefault();dismiss();}}>
     <div className="onboarding-top"><span className="brand-mark" aria-hidden="true">▦</span><button type="button" className="onboarding-close" aria-label={t('Close')} onClick={dismiss}>×</button></div>
-    <h2 id="onboarding-title">{t('Welcome to QR Code Project')}</h2><p className="onboarding-welcome">{content.welcome}</p><p>{content.subtitle}</p>
+    <h2 id="onboarding-title">{t('Welcome to MHG QR Code Generator')}</h2><p className="onboarding-welcome">{content.welcome}</p><p>{content.subtitle}</p>
     <div className="field"><label htmlFor="intro-language">{t('Language')}</label><select id="intro-language" value={language} onChange={e=>setLanguage(e.target.value)}><option value="en">English</option><option value="ar">العربية</option></select></div>
     <h3>{content.instructionsTitle}</h3><ol className="onboarding-steps">{content.steps.map((step,i)=><li key={i}>{step}</li>)}</ol>
     <h3>{content.benefitsTitle}</h3><ul className="onboarding-benefits">{content.benefits.map((benefit,i)=><li key={i}>{benefit}</li>)}</ul>

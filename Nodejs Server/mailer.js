@@ -13,7 +13,7 @@ function createMailer(env = process.env) {
   });
   return { ready: true, async send(email, otp) {
     await transporter.sendMail({
-      from: env.SMTP_FROM, to: email, subject: 'Your QR Code Project verification code',
+      from: env.SMTP_FROM, to: email, subject: 'Your MHG QR Code Generator verification code',
       text: 'Your verification code is ' + otp + '. It expires in 5 minutes. If you did not request this code, ignore this email.',
       disableFileAccess: true, disableUrlAccess: true,
     });

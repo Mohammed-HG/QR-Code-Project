@@ -5,7 +5,7 @@ import { request } from './api';
 import { Link, useNavigation } from './navigation';
 function AuthLayout({ title, children }) {
   const {t}=usePreferences();
-  return <div className="auth-layout"><section className="panel auth-panel"><p className="eyebrow">QR CODE PROJECT</p><h1>{title}</h1>{children}</section></div>;
+  return <div className="auth-layout"><section className="panel auth-panel"><p className="eyebrow">MHG QR CODE GENERATOR</p><h1>{title}</h1>{children}</section></div>;
 }
 export function LoginPage() {
   const {t}=usePreferences();

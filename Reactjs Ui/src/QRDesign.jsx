@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePreferences, contrastInk } from './preferences';
 import icons from './icons.json';
-const patterns=[['square','Square'],['dots','Dots'],['rounded','Rounded'],['diamond','Diamond'],['soft','Soft'],['vertical','Vertical']];
-function Swatch({pattern}){return <span className={'pattern-swatch '+pattern} aria-hidden="true">{Array.from({length:9},(_,i)=><i key={i}/>)}</span>;}
+const patterns=[['square','Default'],['dots','Dots'],['rounded','Rounded'],['diamond','Diamond'],['soft','Soft'],['vertical','Vertical']];
+function Swatch({pattern}){return <img className="pattern-preview" src={'/pattern-previews/'+pattern+'.png'} width="64" height="64" alt="" aria-hidden="true"/>;}
 export function LibrarySymbol({icon,color='#000000'}){return <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{background:contrastInk(color),borderRadius:4,padding:2}} aria-hidden="true"><path d={icon.d}/></svg>;}
 export default function QRDesign({values,update,features,kind='url'}){
   const {t}=usePreferences(),[error,setError]=useState(''),[fileName,setFileName]=useState(''),[category,setCategory]=useState('All icons'),[query,setQuery]=useState('');

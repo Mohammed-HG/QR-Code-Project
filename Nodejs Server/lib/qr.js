@@ -99,9 +99,9 @@ async function render(body) {
   catch { throw new HttpError(400, 'Shorten the content to fit this QR code.'); }
   const n = matrix.size, units = n + 8;
   if (options.width < units * 3) throw new HttpError(400, 'Increase QR size or shorten the content for a readable code.');
-  const directions = { 0: ['0%','0%','100%','0%'], 45: ['0%','0%','100%','100%'], 90: ['0%','0%','0%','100%'], 135: ['100%','0%','0%','100%'] };
+  const directions = { 0: [0,0,units,0], 45: [0,0,units,units], 90: [0,0,0,units], 135: [units,0,0,units] };
   const [x1,y1,x2,y2] = directions[options.angle];
-  const gradient = (id,a,b) => '<linearGradient id="' + id + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"><stop stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient>';
+  const gradient = (id,a,b) => '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"><stop stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient>';
   let cells = '';
   for (let row = 0; row < n; row++) for (let col = 0; col < n; col++) {
     if (!matrix.get(row,col)) continue;
