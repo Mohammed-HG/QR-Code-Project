@@ -150,7 +150,8 @@ async function render(body) {
     const art = await sharp(logo).resize(artSize, artSize, { fit:'contain', background:'#ffffff' })
       .flatten({ background:'#ffffff' }).greyscale().linear(.16, 214).png().toBuffer();
     const foreground = await image.png().toBuffer();
-    image = sharp({ create:{ width:options.width, height:options.width, channels:4, background:options.color.light } })
+    const backdrop = '<svg xmlns="http://www.w3.org/2000/svg" width="'+options.width+'" height="'+options.width+'" viewBox="0 0 '+units+' '+units+'"><defs>'+gradient('art-bg',options.color.light,options.light2,bx1,by1,bx2,by2)+'</defs><rect width="'+units+'" height="'+units+'" fill="url(#art-bg)"/></svg>';
+    image = sharp(Buffer.from(backdrop))
       .composite([{ input:art, gravity:'centre' }, { input:foreground }]);
   } else if (logo) {
     const logoSize = Math.floor(options.width * n / units * .18);
