@@ -62,3 +62,31 @@ test('all pattern previews are real QR codes for google.com', () => {
     assert.equal(jsQR(new Uint8ClampedArray(image.data),image.width,image.height)?.data,'https://google.com/');
   }
 });
+
+test('all styled eyes and connected modules decode at small and large sizes',async()=>{
+  for(const shape of require('../lib/qr').shapes)for(const size of [256,480,1024]){
+    const image=PNG.sync.read(await render({text:'Pattern scan test',dotShape:shape,size}));
+    assert.equal(jsQR(new Uint8ClampedArray(image.data),size,size)?.data,'Pattern scan test',shape+' at '+size);
+  }
+});
+
+test('foreground and background gradient directions are independent and legacy requests still work',async()=>{
+  const {qrOptions}=require('../lib/qr');
+  const options=qrOptions({gradientAngle:135,dotGradientAngle:0,bgGradientAngle:90});
+  assert.equal(options.angle,0);assert.equal(options.backgroundAngle,90);
+  assert.equal(qrOptions({gradientAngle:135}).backgroundAngle,135);
+  assert.throws(()=>qrOptions({bgGradientAngle:72}),/Invalid gradient/);
+  const settings={text:'Independent gradients',dotGradient:true,bgGradient:true,dotColor:'#102040',dotColor2:'#601030',bgColor:'#ffffff',bgColor2:'#e0f0ff',size:480};
+  const first=await render({...settings,dotGradientAngle:0,bgGradientAngle:90});
+  const second=await render({...settings,dotGradientAngle:90,bgGradientAngle:90});
+  const a=PNG.sync.read(first),b=PNG.sync.read(second);
+  assert.deepEqual(a.data.subarray(0,480*4),b.data.subarray(0,480*4),'changing dot direction must not change the background');
+  assert.notDeepEqual(first,second);
+  assert.equal(jsQR(new Uint8ClampedArray(a.data),480,480)?.data,settings.text);
+});
+
+test('artistic logos remain readable as a pale background behind the dots',async()=>{
+  const logo=await sharp(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><circle cx="80" cy="80" r="75" fill="#006040"/><path d="M20 80h120M80 20v120" stroke="white" stroke-width="25"/></svg>')).png().toBuffer();
+  const image=PNG.sync.read(await render({text:'Artistic logo',dotShape:'artistic',logo:'data:image/png;base64,'+logo.toString('base64'),size:640}));
+  assert.equal(jsQR(new Uint8ClampedArray(image.data),640,640)?.data,'Artistic logo');
+});

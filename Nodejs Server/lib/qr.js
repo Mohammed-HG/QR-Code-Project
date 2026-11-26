@@ -42,7 +42,7 @@ const sharp = require('sharp');
 sharp.cache({ memory: 16, files: 0, items: 20 });
 sharp.concurrency(1);
 const iconCatalog = require('./icons.json');
-const shapes = ['square', 'dots', 'rounded', 'diamond', 'soft', 'vertical'];
+const shapes = ['square', 'dots', 'rounded', 'diamond', 'soft', 'vertical', 'horizontal', 'classy', 'artistic'];
 function qrOptions(body) {
   const dark = body.dotColor ?? '#000000', light = body.bgColor ?? '#ffffff';
   const dark2 = body.dotGradient ? body.dotColor2 : dark;
@@ -61,9 +61,10 @@ function qrOptions(body) {
   if (!Number.isInteger(width) || width < 256 || width > 1024) throw new HttpError(400, 'QR size must be an integer between 256 and 1024 pixels.');
   const shape = body.dotShape ?? 'square';
   if (!shapes.includes(shape)) throw new HttpError(400, 'Invalid QR pattern.');
-  const angle = body.gradientAngle ?? 45;
-  if (![0,45,90,135].includes(angle)) throw new HttpError(400, 'Invalid gradient direction.');
-  return { width, margin: 4, errorCorrectionLevel: body.logo || body.iconId ? 'H' : 'M', color: { dark, light }, dark2, light2, shape, angle, transparent: Boolean(body.transparent) };
+  const angle = body.dotGradientAngle ?? body.gradientAngle ?? 45;
+  const backgroundAngle = body.bgGradientAngle ?? body.gradientAngle ?? 45;
+  if (![0,45,90,135].includes(angle) || ![0,45,90,135].includes(backgroundAngle)) throw new HttpError(400, 'Invalid gradient direction.');
+  return { width, margin: 4, errorCorrectionLevel: body.logo || body.iconId ? 'H' : 'M', color: { dark, light }, dark2, light2, shape, angle, backgroundAngle, transparent: Boolean(body.transparent) };
 }
 async function readLogo(input) {
   if (!input) return null;
@@ -101,23 +102,57 @@ async function render(body) {
   if (options.width < units * 3) throw new HttpError(400, 'Increase QR size or shorten the content for a readable code.');
   const directions = { 0: [0,0,units,0], 45: [0,0,units,units], 90: [0,0,0,units], 135: [units,0,0,units] };
   const [x1,y1,x2,y2] = directions[options.angle];
-  const gradient = (id,a,b) => '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"><stop stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient>';
+  const [bx1,by1,bx2,by2] = directions[options.backgroundAngle];
+  const gradient = (id,a,b,x1,y1,x2,y2) => '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"><stop stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient>';
   let cells = '';
+  const styledEyes = options.shape !== 'square';
+  const finders = [[0,0],[n-7,0],[0,n-7]];
+  const insideFinder = (row,col) => finders.some(([x,y])=>col>=x && col<x+7 && row>=y && row<y+7);
+  if (styledEyes) {
+    for(const [col,row] of finders) {
+      const x=col+4,y=row+4;
+      if(options.shape==='dots'||options.shape==='artistic') {
+        cells+='<path fill-rule="evenodd" d="M'+(x+7)+' '+(y+3.5)+'a3.5 3.5 0 1 0 -7 0a3.5 3.5 0 1 0 7 0M'+(x+6)+' '+(y+3.5)+'a2.5 2.5 0 1 0 -5 0a2.5 2.5 0 1 0 5 0"/><circle cx="'+(x+3.5)+'" cy="'+(y+3.5)+'" r="1.5"/>';
+      } else {
+        const radius=options.shape==='diamond'?.3:options.shape==='classy'?2:1.8;
+        cells+='<rect x="'+(x+.5)+'" y="'+(y+.5)+'" width="6" height="6" rx="'+radius+'" fill="none" stroke="url(#dots)" stroke-width="1"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3" rx="'+(radius/2)+'"/>';
+      }
+    }
+  }
+
   for (let row = 0; row < n; row++) for (let col = 0; col < n; col++) {
-    if (!matrix.get(row,col)) continue;
+    if (!matrix.get(row,col) || (styledEyes && insideFinder(row,col))) continue;
     const x = col + 4, y = row + 4, shape = matrix.isReserved(row,col) ? 'square' : options.shape;
-    if (shape === 'dots') cells += '<circle cx="' + (x+.5) + '" cy="' + (y+.5) + '" r=".44"/>';
+
+    if ((shape==='horizontal'||shape==='vertical') && !matrix.isReserved(row,col)) {
+      const horizontal=shape==='horizontal';
+      if(horizontal && col>0 && matrix.get(row,col-1) && !matrix.isReserved(row,col-1)) continue;
+      if(!horizontal && row>0 && matrix.get(row-1,col) && !matrix.isReserved(row-1,col)) continue;
+      let length=1;
+      while((horizontal?col+length:row+length)<n && matrix.get(horizontal?row:row+length,horizontal?col+length:col) && !matrix.isReserved(horizontal?row:row+length,horizontal?col+length:col)) length++;
+      cells+='<rect x="'+(x+.12)+'" y="'+(y+.12)+'" width="'+(horizontal?length-.24:.76)+'" height="'+(horizontal?.76:length-.24)+'" rx=".38"/>';
+    }
+    else if (shape === 'classy') cells+='<path d="M'+x+' '+(y+.5)+'Q'+x+' '+y+' '+(x+.5)+' '+y+'H'+(x+1)+'V'+(y+.5)+'Q'+(x+1)+' '+(y+1)+' '+(x+.5)+' '+(y+1)+'H'+x+'Z"/>';
+    else if (shape === 'dots'||shape==='artistic') cells += '<circle cx="' + (x+.5) + '" cy="' + (y+.5) + '" r="' + (shape === 'artistic' ? .34 : .4) + '"/>';
     else if (shape === 'diamond') cells += '<path d="M' + (x+.5) + ' ' + y + 'L' + (x+1) + ' ' + (y+.5) + 'L' + (x+.5) + ' ' + (y+1) + 'L' + x + ' ' + (y+.5) + 'Z"/>';
     else if (shape === 'vertical') cells += '<rect x="' + (x+.13) + '" y="' + y + '" width=".74" height="1" rx=".3"/>';
     else cells += '<rect x="' + x + '" y="' + y + '" width="1" height="1" rx="' + (shape === 'rounded' ? .32 : shape === 'soft' ? .15 : 0) + '"/>';
   }
   const renderSize = units * Math.floor(options.width / units);
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + renderSize + '" height="' + renderSize + '" viewBox="0 0 ' + units + ' ' + units + '"><defs>' +
-    gradient('dots',options.color.dark,options.dark2) + gradient('background',options.color.light,options.light2) + '</defs>' +
-    (options.transparent ? '' : '<rect width="' + units + '" height="' + units + '" fill="url(#background)"/>') + '<g fill="url(#dots)">' + cells + '</g></svg>';
+    gradient('dots',options.color.dark,options.dark2,x1,y1,x2,y2) + gradient('background',options.color.light,options.light2,bx1,by1,bx2,by2) + '</defs>' +
+    (options.transparent || (options.shape === 'artistic' && logo) ? '' : '<rect width="' + units + '" height="' + units + '" fill="url(#background)"/>') + '<g fill="url(#dots)">' + cells + '</g></svg>';
   const extra = options.width - renderSize;
   let image = sharp(Buffer.from(svg), { limitInputPixels: 1048576 }).extend({ top:Math.floor(extra/2), bottom:Math.ceil(extra/2), left:Math.floor(extra/2), right:Math.ceil(extra/2), background:options.transparent ? '#00000000' : options.color.light });
-  if (logo) {
+  if (logo && options.shape === 'artistic' && !options.transparent) {
+    // Keep the artwork pale so the dark QR modules retain a readable contrast.
+    const artSize = Math.floor(options.width * n / units * .9);
+    const art = await sharp(logo).resize(artSize, artSize, { fit:'contain', background:'#ffffff' })
+      .flatten({ background:'#ffffff' }).greyscale().linear(.16, 214).png().toBuffer();
+    const foreground = await image.png().toBuffer();
+    image = sharp({ create:{ width:options.width, height:options.width, channels:4, background:options.color.light } })
+      .composite([{ input:art, gravity:'centre' }, { input:foreground }]);
+  } else if (logo) {
     const logoSize = Math.floor(options.width * n / units * .18);
     const padding = Math.max(3, Math.round(options.width * .008));
     const mark = await sharp(logo).resize(logoSize,logoSize,{ fit:'contain',background:'#ffffff' }).extend({ top:padding,bottom:padding,left:padding,right:padding,background:'#ffffff' }).png().toBuffer();
@@ -141,7 +176,7 @@ async function render(body) {
   if (line) lines.push(line);
   const height = width + padding * 2 + lineHeight * lines.length;
   const escape = text => text.replace(/[&<>"']/g, value => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[value]));
-  const coordinates = directions[options.angle].map(value => parseInt(value,10) * width / 100);
+  const coordinates = directions[options.backgroundAngle].map(value => parseInt(value,10) * width / 100);
   const background = options.transparent ? '' : '<defs><linearGradient id="caption-bg" gradientUnits="userSpaceOnUse" x1="'+coordinates[0]+'" y1="'+coordinates[1]+'" x2="'+coordinates[2]+'" y2="'+coordinates[3]+'"><stop stop-color="'+options.color.light+'"/><stop offset="1" stop-color="'+options.light2+'"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#caption-bg)"/>';
   const direction = /[\u0590-\u08ff]/.test(caption) ? 'rtl' : 'ltr';
   const lettering = lines.map((text,i) => '<text x="'+width/2+'" y="'+(width+padding+fontSize+i*lineHeight)+'" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="'+fontSize+'" direction="'+direction+'" unicode-bidi="plaintext" fill="'+options.color.dark+'">'+escape(text)+'</text>').join('');

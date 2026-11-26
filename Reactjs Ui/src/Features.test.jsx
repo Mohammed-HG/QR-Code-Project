@@ -140,3 +140,18 @@ test('signed-in name is outside the menu and About links to the owner GitHub pro
   expect(about).toBeTruthy();await user.click(about);
   expect(screen.getByRole('link',{name:'Mohammed-HG ↗'}).getAttribute('href')).toBe('https://github.com/Mohammed-HG');
 });
+
+test('gradient direction controls appear independently only for active two-color modes',async()=>{
+  const user=userEvent.setup();render(<Generator/>);
+  expect(screen.queryByLabelText('QR gradient direction')).toBeNull();
+  expect(screen.queryByLabelText('Background gradient direction')).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Dot color mode'}));
+  await user.selectOptions(screen.getByLabelText('QR gradient direction'),'0');
+  expect(screen.queryByLabelText('Background gradient direction')).toBeNull();
+  await user.click(screen.getByRole('button',{name:'Background color mode'}));
+  await user.selectOptions(screen.getByLabelText('Background gradient direction'),'90');
+  expect(screen.getByLabelText('QR gradient direction').value).toBe('0');
+  await user.click(screen.getByRole('button',{name:'Transparent background'}));
+  expect(screen.queryByLabelText('Background gradient direction')).toBeNull();
+  expect(screen.getByLabelText('QR gradient direction').value).toBe('0');
+});
